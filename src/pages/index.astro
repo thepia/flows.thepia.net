@@ -1,0 +1,52 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/landing/Hero.astro';
+import HowItWorks from '../components/landing/HowItWorks.astro';
+import Features from '../components/landing/Features.astro';
+import AuthSection from '../components/auth/AuthSection.svelte';
+import Footer from '../components/landing/Footer.astro';
+
+// Page metadata
+const title = 'Thepia Flows - Custom Workflow Apps for Personal Devices';
+const description = 'Transform your manual business processes into streamlined digital workflows. Privacy-compliant applications that run on employees\' personal devices with mobile-optimized, camera-enabled visual documentation.';
+---
+
+<Layout title={title} description={description}>
+  <main>
+    <!-- Hero Section -->
+    <Hero />
+    
+    <!-- How It Works Section -->
+    <HowItWorks />
+    
+    <!-- Features Section -->
+    <Features />
+    
+    <!-- Authentication Section -->
+    <section id="auth" class="py-section bg-gray-50 dark:bg-gray-800/50">
+      <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-serif mb-6">
+            Ready to Experience Flows?
+          </h2>
+          <p class="text-xl text-gray-700 dark:text-gray-300 mb-8">
+            Access the live demo to see how Thepia Flows transforms workplace processes. 
+            Employee authentication required.
+          </p>
+        </div>
+        
+        <!-- Svelte Authentication Component -->
+        <div class="max-w-md mx-auto">
+          <AuthSection client:load />
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <Footer />
+</Layout>
+
+<style>
+  /* Import global styles */
+  @import '../styles/global.css';
+</style>

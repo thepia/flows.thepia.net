@@ -1,0 +1,99 @@
+---
+// Hero component for flows.thepia.net landing page
+// Based on thepia.com/flows hero section patterns
+---
+
+<section class="py-section min-h-screen flex items-center">
+  <div class="container mx-auto px-4">
+    <div class="max-w-4xl mx-auto text-center">
+      <!-- Hero Badge -->
+      <div class="inline-flex items-center px-4 py-2 bg-primary/10 rounded-full text-primary font-medium mb-6">
+        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+        Live Demo Available
+      </div>
+      
+      <!-- Main Heading -->
+      <h1 class="text-4xl md:text-6xl font-serif mb-6 leading-tight">
+        Custom Workflow Apps for 
+        <span class="gradient-text">Personal Devices</span>
+      </h1>
+      
+      <!-- Subheading -->
+      <p class="text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+        We build privacy-compliant workflow applications that run on your employees' personal devices. 
+        Mobile-optimized, camera-enabled, and designed for seamless visual documentation.
+      </p>
+      
+      <!-- Key Benefits -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto">
+        <div class="flex items-center justify-center md:justify-start">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <span class="text-gray-700 dark:text-gray-300 font-medium">Privacy-First</span>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-center md:justify-start">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <span class="text-gray-700 dark:text-gray-300 font-medium">Mobile-Optimized</span>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-center md:justify-start">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <svg class="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <span class="text-gray-700 dark:text-gray-300 font-medium">Visual Documentation</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <a href="#auth" class="btn-primary text-lg px-8 py-4">
+          Try Live Demo
+        </a>
+        <a href="#how-it-works" class="btn-outline text-lg px-8 py-4">
+          Learn More
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Smooth scroll behavior for anchor links */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Gradient animation for the hero text */
+  .gradient-text {
+    background: linear-gradient(135deg, #988ACA 0%, #7B6BB7 50%, #654CA3 100%);
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease-in-out infinite;
+  }
+  
+  @keyframes gradient-shift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+</style>
