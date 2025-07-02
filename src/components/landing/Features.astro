@@ -9,13 +9,18 @@ import ConsultingIllustration from '../../assets/illustrations/Consulting_Monoch
     <!-- Section Header -->
     <div class="text-center mb-16">
       <div class="mb-8">
-        <Image
-          src={ConsultingIllustration}
-          alt="Expert consulting and guidance illustration"
-          width={300}
-          height={240}
-          class="w-auto h-48 mx-auto"
-        />
+        <div class="relative inline-block">
+          <Image
+            src={ConsultingIllustration}
+            alt="Expert consulting and guidance illustration"
+            width={500}
+            height={400}
+            class="w-full max-w-md mx-auto"
+          />
+          <!-- Decorative elements -->
+          <div class="absolute -top-4 -right-4 w-16 h-16 bg-primary/20 rounded-full"></div>
+          <div class="absolute -bottom-4 -left-4 w-12 h-12 bg-primary/30 rounded-full"></div>
+        </div>
       </div>
       <h2 class="text-3xl md:text-4xl font-serif mb-6">Perfect For</h2>
       <p class="text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">
