@@ -12,6 +12,11 @@ export default defineConfig({
   build: {
     assets: 'assets',
   },
+  image: {
+    service: {
+      entrypoint: 'astro/assets/services/noop'
+    }
+  },
   vite: {
     plugins: [tailwindcss()],
     define: {

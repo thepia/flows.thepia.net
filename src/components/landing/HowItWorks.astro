@@ -1,94 +1,161 @@
 ---
 // HowItWorks component - Based on thepia.com/flows patterns
-import CodingIllustration from '../../assets/illustrations/Coding_Monochromatic.svg?raw';
-import GroupPresentationIllustration from '../../assets/illustrations/Group_Presentation_Monochromatic.svg?raw';
-import AnalysisIllustration from '../../assets/illustrations/Analysis_Monochromatic.svg?raw';
+import { Image } from 'astro:assets';
+import CodingIllustration from '../../assets/illustrations/Coding_Monochromatic.svg';
+import GroupPresentationIllustration from '../../assets/illustrations/Group_Presentation_Monochromatic.svg';
+import AnalysisIllustration from '../../assets/illustrations/Analysis_Monochromatic.svg';
 ---
 
 <section id="how-it-works" class="py-section">
   <div class="container mx-auto px-4">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-      <!-- Content Side -->
-      <div>
-        <h2 class="text-3xl md:text-4xl font-serif mb-8">How It Works</h2>
-        <div class="space-y-8">
-          <!-- Step 1 -->
-          <div class="flex items-start">
-            <div class="step-indicator mr-4">1</div>
-            <div>
-              <h3 class="text-xl font-medium mb-3">Provide Your Process Documentation</h3>
-              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-                Share your existing workflow documentation. We analyze your process requirements and identify opportunities for mobile optimization.
-              </p>
-            </div>
+    <!-- Section Header -->
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-serif mb-6">How It Works</h2>
+      <p class="text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">
+        Transform your manual processes into streamlined digital workflows in three simple steps
+      </p>
+    </div>
+
+    <!-- Steps Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Step 1 -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col">
+        <!-- Step Image -->
+        <div class="bg-primary/5 p-8 flex items-center justify-center">
+          <Image
+            src={CodingIllustration}
+            alt="Workflow development and coding illustration"
+            width={192}
+            height={192}
+            class="h-48 w-auto"
+          />
+        </div>
+
+        <!-- Step Content -->
+        <div class="p-6 flex-grow">
+          <div class="flex items-center mb-4">
+            <div class="step-indicator mr-3">1</div>
+            <h3 class="text-xl font-medium">Build Your Workflow</h3>
           </div>
-          
-          <!-- Step 2 -->
-          <div class="flex items-start">
-            <div class="step-indicator mr-4">2</div>
-            <div>
-              <h3 class="text-xl font-medium mb-3">Custom App Development</h3>
-              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-                We build a tailored Svelte application optimized for your specific workflow, with camera integration and visual documentation features.
-              </p>
-            </div>
-          </div>
-          
-          <!-- Step 3 -->
-          <div class="flex items-start">
-            <div class="step-indicator mr-4">3</div>
-            <div>
-              <h3 class="text-xl font-medium mb-3">Deploy & Monitor</h3>
-              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-                Your workflow app is deployed to employee devices with real-time monitoring, analytics, and continuous optimization support.
-              </p>
-            </div>
-          </div>
+          <p class="text-gray-600 dark:text-gray-400 mb-6">
+            Share your existing process documentation. We analyze requirements and build a tailored Svelte application optimized for your specific workflow.
+          </p>
+
+          <!-- Features List -->
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-gray-700 dark:text-gray-300">Process analysis & optimization</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-gray-700 dark:text-gray-300">Mobile-first development</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-gray-700 dark:text-gray-300">Camera & visual integration</span>
+            </li>
+          </ul>
         </div>
       </div>
-      
-      <!-- Visual Side -->
-      <div class="relative">
-        <!-- Step Illustrations -->
-        <div class="space-y-8">
-          <!-- Step 1 Illustration -->
-          <div class="bg-gradient-to-br from-primary/10 to-purple-600/10 rounded-2xl p-6 text-center">
-            <div class="w-24 h-24 mx-auto mb-4">
-              <div
-                class="w-full h-full"
-                set:html={CodingIllustration}
-                aria-label="Workflow development and coding illustration"
-              />
-            </div>
-            <h4 class="font-medium text-lg mb-2">Build Your Workflow</h4>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Custom development tailored to your process</p>
-          </div>
 
-          <!-- Step 2 Illustration -->
-          <div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 text-center">
-            <div class="w-24 h-24 mx-auto mb-4">
-              <div
-                class="w-full h-full"
-                set:html={GroupPresentationIllustration}
-                aria-label="Team training and presentation illustration"
-              />
-            </div>
-            <h4 class="font-medium text-lg mb-2">Train Your Team</h4>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Onboard employees with guided workflows</p>
-          </div>
+      <!-- Step 2 -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col">
+        <!-- Step Image -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 p-8 flex items-center justify-center">
+          <Image
+            src={GroupPresentationIllustration}
+            alt="Team training and presentation illustration"
+            width={192}
+            height={192}
+            class="h-48 w-auto"
+          />
+        </div>
 
-          <!-- Step 3 Illustration -->
-          <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-6 text-center">
-            <div class="w-24 h-24 mx-auto mb-4">
-              <div
-                class="w-full h-full"
-                set:html={AnalysisIllustration}
-                aria-label="Data analysis and insights illustration"
-              />
-            </div>
-            <h4 class="font-medium text-lg mb-2">Analyze Results</h4>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Monitor performance and optimize processes</p>
+        <!-- Step Content -->
+        <div class="p-6 flex-grow">
+          <div class="flex items-center mb-4">
+            <div class="step-indicator mr-3">2</div>
+            <h3 class="text-xl font-medium">Train Your Team</h3>
           </div>
+          <p class="text-gray-600 dark:text-gray-400 mb-6">
+            Onboard employees with guided workflows and comprehensive training. Your team learns the new process while maintaining productivity.
+          </p>
+
+          <!-- Features List -->
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-gray-700 dark:text-gray-300">Interactive training modules</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-gray-700 dark:text-gray-300">Progress tracking</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-gray-700 dark:text-gray-300">Support & documentation</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col">
+        <!-- Step Image -->
+        <div class="bg-green-50 dark:bg-green-900/20 p-8 flex items-center justify-center">
+          <Image
+            src={AnalysisIllustration}
+            alt="Data analysis and insights illustration"
+            width={192}
+            height={192}
+            class="h-48 w-auto"
+          />
+        </div>
+
+        <!-- Step Content -->
+        <div class="p-6 flex-grow">
+          <div class="flex items-center mb-4">
+            <div class="step-indicator mr-3">3</div>
+            <h3 class="text-xl font-medium">Analyze Results</h3>
+          </div>
+          <p class="text-gray-600 dark:text-gray-400 mb-6">
+            Monitor performance with real-time analytics and insights. Continuous optimization ensures your workflow evolves with your business needs.
+          </p>
+
+          <!-- Features List -->
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-gray-700 dark:text-gray-300">Real-time monitoring</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-gray-700 dark:text-gray-300">Performance analytics</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-gray-700 dark:text-gray-300">Continuous optimization</span>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
