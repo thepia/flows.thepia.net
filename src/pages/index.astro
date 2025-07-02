@@ -1,14 +1,15 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import AuthSection from '../components/auth/AuthSection.svelte';
+import Features from '../components/landing/Features.astro';
+import Footer from '../components/landing/Footer.astro';
 import Hero from '../components/landing/Hero.astro';
 import HowItWorks from '../components/landing/HowItWorks.astro';
-import Features from '../components/landing/Features.astro';
-import AuthSection from '../components/auth/AuthSection.svelte';
-import Footer from '../components/landing/Footer.astro';
+import Layout from '../layouts/Layout.astro';
 
 // Page metadata
 const title = 'Thepia Flows - Custom Workflow Apps for Personal Devices';
-const description = 'Transform your manual business processes into streamlined digital workflows. Privacy-compliant applications that run on employees\' personal devices with mobile-optimized, camera-enabled visual documentation.';
+const description =
+  "Transform your manual business processes into streamlined digital workflows. Privacy-compliant applications that run on employees' personal devices with mobile-optimized, camera-enabled visual documentation.";
 ---
 
 <Layout title={title} description={description}>

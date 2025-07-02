@@ -1,60 +1,59 @@
 <script>
-  import { onMount } from 'svelte';
+import { onMount } from 'svelte';
 
-  // Browser detection for Astro environment
-  const browser = typeof window !== 'undefined';
-  
-  let authStore = null;
-  let isLoading = true;
-  let error = null;
-  let isAuthenticated = false;
-  let user = null;
+// Browser detection for Astro environment
+const browser = typeof window !== 'undefined';
 
-  onMount(async () => {
-    if (!browser) return;
+let authStore = null;
+let isLoading = true;
+let error = null;
+const isAuthenticated = false;
+const user = null;
 
-    try {
-      // Mock auth implementation for initial development
-      // TODO: Replace with actual flows-auth integration
+onMount(async () => {
+  if (!browser) return;
 
-      // Simulate loading delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+  try {
+    // Mock auth implementation for initial development
+    // TODO: Replace with actual flows-auth integration
 
-      // Mock auth store
-      authStore = {
-        subscribe: (callback) => {
-          callback({
-            isAuthenticated: false,
-            user: null,
-            isLoading: false,
-            error: null,
-          });
-          return () => {}; // unsubscribe function
-        },
-        initialize: async () => {
-          isLoading = false;
-        },
-        signIn: () => {
-          // Mock sign in - show alert for now
-          alert('Mock sign in - flows-auth integration coming soon!');
-        }
-      };
+    // Simulate loading delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Initialize mock auth store
-      await authStore.initialize();
+    // Mock auth store
+    authStore = {
+      subscribe: (callback) => {
+        callback({
+          isAuthenticated: false,
+          user: null,
+          isLoading: false,
+          error: null,
+        });
+        return () => {}; // unsubscribe function
+      },
+      initialize: async () => {
+        isLoading = false;
+      },
+      signIn: () => {
+        // Mock sign in - show alert for now
+        alert('Mock sign in - flows-auth integration coming soon!');
+      },
+    };
 
-    } catch (err) {
-      console.error('Failed to load auth:', err);
-      error = 'Failed to load authentication system';
-      isLoading = false;
-    }
-  });
-
-  function handleSignIn() {
-    if (authStore) {
-      authStore.signIn();
-    }
+    // Initialize mock auth store
+    await authStore.initialize();
+  } catch (err) {
+    console.error('Failed to load auth:', err);
+    error = 'Failed to load authentication system';
+    isLoading = false;
   }
+});
+
+function handleSignIn() {
+  if (authStore) {
+    authStore.signIn();
+  }
+}
 </script>
 
 <div class="auth-section">

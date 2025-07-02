@@ -6,11 +6,11 @@ export interface Props {
   canonical?: string;
 }
 
-const { 
-  title, 
-  description = "Transform your manual business processes into streamlined digital workflows with Thepia Flows.",
-  image = "/og-image.png",
-  canonical
+const {
+  title,
+  description = 'Transform your manual business processes into streamlined digital workflows with Thepia Flows.',
+  image = '/og-image.png',
+  canonical,
 } = Astro.props;
 
 const canonicalURL = canonical || new URL(Astro.url.pathname, Astro.site);
