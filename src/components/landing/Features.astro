@@ -1,11 +1,19 @@
 ---
 // Features component - Based on thepia.com/flows use cases
+import ConsultingIllustration from '../../assets/illustrations/Consulting_Monochromatic.svg?raw';
 ---
 
 <section class="py-section bg-gray-50 dark:bg-gray-800/50">
   <div class="container mx-auto px-4">
     <!-- Section Header -->
     <div class="text-center mb-16">
+      <div class="w-32 h-32 mx-auto mb-8">
+        <div
+          class="w-full h-full"
+          set:html={ConsultingIllustration}
+          aria-label="Expert consulting and guidance illustration"
+        />
+      </div>
       <h2 class="text-3xl md:text-4xl font-serif mb-6">Perfect For</h2>
       <p class="text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">
         Thepia Flows transforms complex workplace processes into streamlined mobile experiences
