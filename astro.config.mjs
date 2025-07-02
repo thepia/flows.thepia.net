@@ -1,14 +1,11 @@
 import { defineConfig } from 'astro/config';
 import svelte from '@astrojs/svelte';
-import tailwind from '@astrojs/tailwind';
+import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
   integrations: [
     svelte(),
-    tailwind({
-      applyBaseStyles: false, // We'll use our own base styles
-    }),
   ],
   output: 'static',
   site: 'https://flows.thepia.net',
@@ -16,6 +13,7 @@ export default defineConfig({
     assets: 'assets',
   },
   vite: {
+    plugins: [tailwindcss()],
     define: {
       __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
     },
