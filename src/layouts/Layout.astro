@@ -44,20 +44,10 @@ const canonicalURL = canonical || new URL(Astro.url.pathname, Astro.site);
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={new URL(image, Astro.url)} />
     
-    <!-- Preload critical fonts -->
-    <link rel="preload" href="/fonts/bembo.woff2" as="font" type="font/woff2" crossorigin />
-    
-    <!-- Global Styles -->
-    <style>
-      /* Critical CSS for font loading */
-      @font-face {
-        font-family: 'Bembo';
-        src: url('/fonts/bembo.woff2') format('woff2');
-        font-weight: normal;
-        font-style: normal;
-        font-display: swap;
-      }
-    </style>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
   <body>
     <slot />

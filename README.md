@@ -111,6 +111,13 @@ flows.thepia.net/
 - **Real client examples** from demo database
 - **Performance considerations** for public access
 
+### Branding Integration (Planned)
+- **@thepia/branding package** for consistent brand application
+- **First implementation** to test and refine the branding system
+- **Design token migration** from manual to package-based tokens
+- **Asset integration** for logos, fonts, and brand elements
+- **See [Branding Integration Plan](./docs/branding-integration.md)** for detailed roadmap
+
 ## Security Considerations
 
 ### Public Access
