@@ -1,28 +1,25 @@
 @import "tailwindcss";
 
-/* Import Thepia Branding Package Tokens - v1.1.0+ */
-@import "@thepia/branding/tailwind/variables";
-
 /* Enable class-based dark mode */
 @variant dark (&:where(.dark, .dark *));
 
-/* Tailwind v4 CSS-based configuration - Using @thepia/branding tokens (fixed) */
+/* Tailwind v4 CSS-based configuration - Aligned with Thepia design tokens */
 @theme {
-  /* Primary Colors - From @thepia/branding package (fixed variable names) */
-  --color-primary: var(--color-brand-primary);
+  /* Primary Colors - Thepia Brand (Lavender) */
+  --color-primary: #988aca;
 
-  /* Primary Color Scale - From @thepia/branding package (fixed variable names) */
-  --color-primary-50: var(--color-palette-thepia-50);
-  --color-primary-100: var(--color-palette-thepia-100);
-  --color-primary-200: var(--color-palette-thepia-200);
-  --color-primary-300: var(--color-palette-thepia-300);
-  --color-primary-400: var(--color-palette-thepia-400);
-  --color-primary-500: var(--color-palette-thepia-500);
-  --color-primary-600: var(--color-palette-thepia-600);
-  --color-primary-700: var(--color-palette-thepia-700);
-  --color-primary-800: var(--color-palette-thepia-800);
-  --color-primary-900: var(--color-palette-thepia-900);
-  --color-primary-950: var(--color-palette-thepia-950);
+  /* Primary Color Scale */
+  --color-primary-50: #f5f3fc;
+  --color-primary-100: #ebe7f8;
+  --color-primary-200: #d7cff1;
+  --color-primary-300: #c3b7ea;
+  --color-primary-400: #988aca;
+  --color-primary-500: #7b6bb7;
+  --color-primary-600: #654ca3;
+  --color-primary-700: #533e89;
+  --color-primary-800: #41316f;
+  --color-primary-900: #2f2455;
+  --color-primary-950: #1e1a3a;
 
   /* Brand Green Scale */
   --color-brand-green-50: #f3f8f5;
@@ -49,15 +46,9 @@
   --color-gray-900: #111827;
 
   /* Font families */
-  --font-serif: var(--typography-font-family-brand-primary);
-  --font-sans: var(--typography-font-family-brand-body);
-  --font-mono: var(--typography-font-family-brand-secondary);
+  --font-serif: "EB Garamond", "New York", Times, serif;
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-  /* Font weights - Using @thepia/branding typography tokens */
-  --font-normal: var(--typography-font-weight-normal);
-  --font-medium: var(--typography-font-weight-medium);
-  --font-semibold: var(--typography-font-weight-semibold);
-  --font-bold: var(--typography-font-weight-bold);
   /* Spacing */
   --spacing-section: 6rem;
 }
@@ -88,41 +79,41 @@ h6 {
 }
 
 h1 {
-  font-size: var(--size-font-4xl); /* 2.25rem - exact match */
+  font-size: 2.25rem;
   font-weight: 500;
 }
 
 @media (min-width: 768px) {
   h1 {
-    font-size: var(--size-font-5xl); /* 3rem - exact match */
+    font-size: 3rem;
   }
 }
 
 h2 {
-  font-size: var(--size-font-3xl); /* 1.875rem - exact match */
+  font-size: 1.875rem;
   font-weight: 500;
 }
 
 @media (min-width: 768px) {
   h2 {
-    font-size: var(--size-font-4xl); /* 2.25rem - exact match */
+    font-size: 2.25rem;
   }
 }
 
 h3 {
-  font-size: 1.5rem; /* Keep manual - no exact branding match */
+  font-size: 1.5rem;
   font-weight: 500;
 }
 
 @media (min-width: 768px) {
   h3 {
-    font-size: var(--size-font-3xl); /* 1.875rem - exact match */
+    font-size: 1.875rem;
   }
 }
 
 p {
-  font-size: var(--size-font-lg); /* 1.125rem - exact match */
-  line-height: 1.75; /* Keep manual - no exact branding match */
+  font-size: 1.125rem;
+  line-height: 1.75;
 }
 
 /* Component styles */
@@ -131,7 +122,7 @@ p {
   background-color: var(--color-primary);
   color: white;
   padding: 0.75rem 1.5rem;
-  border-radius: var(--size-radius-4); /* 0.5rem - exact match */
+  border-radius: 0.5rem;
   font-weight: 500;
   transition: all 0.2s ease-in-out;
 }
@@ -144,7 +135,7 @@ p {
   background-color: var(--color-gray-200);
   color: var(--color-gray-800);
   padding: 0.75rem 1.5rem;
-  border-radius: var(--size-radius-4); /* 0.5rem - exact match */
+  border-radius: 0.5rem;
   font-weight: 500;
   transition: all 0.2s ease-in-out;
 }
@@ -157,7 +148,7 @@ p {
   border: 2px solid var(--color-primary);
   color: var(--color-primary);
   padding: 0.75rem 1.5rem;
-  border-radius: var(--size-radius-4); /* 0.5rem - exact match */
+  border-radius: 0.5rem;
   font-weight: 500;
   transition: all 0.2s ease-in-out;
   background-color: transparent;
@@ -171,7 +162,7 @@ p {
 /* Card Components */
 .card {
   background-color: white;
-  border-radius: var(--size-radius-6); /* 0.75rem - exact match */
+  border-radius: 0.75rem;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   border: 1px solid var(--color-gray-200);
   padding: 1.5rem;
@@ -179,7 +170,7 @@ p {
 
 .card-hover {
   background-color: white;
-  border-radius: var(--size-radius-6); /* 0.75rem - exact match */
+  border-radius: 0.75rem;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   border: 1px solid var(--color-gray-200);
   padding: 1.5rem;
@@ -198,7 +189,7 @@ p {
 
 /* Container */
 .container {
-  max-width: var(--size-width-7xl); /* 80rem - exact match */
+  max-width: 80rem;
   margin-left: auto;
   margin-right: auto;
   padding-left: 1rem;
@@ -223,7 +214,7 @@ p {
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: var(--spacing-semantic-lg); /* 2rem - exact match */
+  gap: 2rem;
 }
 
 @media (min-width: 768px) {
@@ -249,10 +240,10 @@ p {
 /* Step Indicator */
 .step-indicator {
   flex-shrink: 0;
-  width: var(--size-height-sm); /* 2rem - exact match */
-  height: var(--size-height-sm); /* 2rem - exact match */
+  width: 2rem;
+  height: 2rem;
   background-color: var(--color-primary);
-  border-radius: var(--size-radius-full); /* 9999px - exact match */
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;

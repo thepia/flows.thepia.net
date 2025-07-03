@@ -1,5 +1,7 @@
 ---
 // Footer component for flows.thepia.net
+import { Image } from 'astro:assets';
+import logoSquare from '@thepia/branding/assets/logo-square.png';
 ---
 
 <footer class="bg-gray-900 text-white py-12">
@@ -8,11 +10,13 @@
       <!-- Brand Section -->
       <div class="md:col-span-2">
         <div class="flex items-center mb-4">
-          <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mr-3">
-            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-            </svg>
-          </div>
+          <Image
+            src={logoSquare}
+            alt="Thepia"
+            width={32}
+            height={32}
+            class="mr-3"
+          />
           <span class="text-xl font-serif">Thepia Flows</span>
         </div>
         <p class="text-gray-400 mb-4 max-w-md">
@@ -41,7 +45,7 @@
           <li><a href="#how-it-works" class="text-gray-400 hover:text-white transition-colors">How It Works</a></li>
           <li><a href="#features" class="text-gray-400 hover:text-white transition-colors">Features</a></li>
           <li><a href="https://thepia.com/flows" class="text-gray-400 hover:text-white transition-colors">Documentation</a></li>
-          <li><a href="https://thepia.com/contact" class="text-gray-400 hover:text-white transition-colors">Contact Sales</a></li>
+          <li><a href="https://thepia.com/#contact" class="text-gray-400 hover:text-white transition-colors">Contact Sales</a></li>
         </ul>
       </div>
       
@@ -49,10 +53,10 @@
       <div>
         <h3 class="text-sm font-semibold text-gray-300 tracking-wider uppercase mb-4">Company</h3>
         <ul class="space-y-2">
-          <li><a href="https://thepia.com/about" class="text-gray-400 hover:text-white transition-colors">About</a></li>
+          <li><a href="https://thepia.com/#about" class="text-gray-400 hover:text-white transition-colors">About</a></li>
           <li><a href="https://thepia.com/privacy" class="text-gray-400 hover:text-white transition-colors">Privacy</a></li>
           <li><a href="https://thepia.com/terms" class="text-gray-400 hover:text-white transition-colors">Terms</a></li>
-          <li><a href="https://thepia.com/security" class="text-gray-400 hover:text-white transition-colors">Security</a></li>
+          <li><a href="https://thepia.com/#research" class="text-gray-400 hover:text-white transition-colors">Research</a></li>
         </ul>
       </div>
     </div>
@@ -62,9 +66,71 @@
       <p class="text-gray-400 text-sm">
         © {new Date().getFullYear()} Thepia. All rights reserved.
       </p>
-      <p class="text-gray-400 text-sm mt-2 md:mt-0">
-        Built with privacy-first principles
-      </p>
+
+      <!-- Theme Toggle and Built With -->
+      <div class="flex items-center space-x-4 mt-2 md:mt-0">
+        <!-- Dark Mode Toggle -->
+        <button
+          id="theme-toggle-footer"
+          class="theme-toggle p-2 text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none rounded-full"
+          style="transition: all 0.2s ease-in-out;"
+          aria-label="Toggle dark mode"
+        >
+          <!-- Sun icon for dark mode -->
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 hidden dark:block">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+          </svg>
+
+          <!-- Moon icon for light mode -->
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 block dark:hidden">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+          </svg>
+        </button>
+
+        <p class="text-gray-400 text-sm">
+          Built with privacy-first principles
+        </p>
+      </div>
     </div>
   </div>
 </footer>
+
+<script>
+  // Dark mode toggle functionality
+  const themeToggleFooter = document.getElementById('theme-toggle-footer');
+
+  function toggleDarkMode() {
+    const isDark = document.documentElement.classList.contains('dark');
+
+    if (isDark) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    }
+  }
+
+  if (themeToggleFooter) {
+    themeToggleFooter.addEventListener('click', toggleDarkMode);
+  }
+</script>
+
+<style>
+  .theme-toggle:hover {
+    background-color: rgba(31, 41, 55, 0.8);
+  }
+
+  .theme-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-brand-primary, #988ACA);
+  }
+
+  .theme-toggle svg {
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .theme-toggle:hover svg {
+    transform: scale(1.1);
+  }
+</style>
