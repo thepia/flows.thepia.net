@@ -5,10 +5,10 @@ import { onMount } from 'svelte';
 const browser = typeof window !== 'undefined';
 
 let authStore = null;
-let isLoading = true;
-let error = null;
-const isAuthenticated = false;
-const user = null;
+let _isLoading = true;
+let _error = null;
+const _isAuthenticated = false;
+const _user = null;
 
 onMount(async () => {
   if (!browser) return;
@@ -32,7 +32,7 @@ onMount(async () => {
         return () => {}; // unsubscribe function
       },
       initialize: async () => {
-        isLoading = false;
+        _isLoading = false;
       },
       signIn: () => {
         // Mock sign in - show alert for now
@@ -44,8 +44,8 @@ onMount(async () => {
     await authStore.initialize();
   } catch (err) {
     console.error('Failed to load auth:', err);
-    error = 'Failed to load authentication system';
-    isLoading = false;
+    _error = 'Failed to load authentication system';
+    _isLoading = false;
   }
 });
 
@@ -57,20 +57,20 @@ function handleSignIn() {
 </script>
 
 <div class="auth-section">
-  {#if isLoading}
+  {#if _isLoading}
     <!-- Loading State -->
     <div class="flex items-center justify-center p-8">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       <span class="ml-3 text-gray-600">Loading authentication...</span>
     </div>
-  {:else if error}
+  {:else if _error}
     <!-- Error State -->
     <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
       <svg class="w-12 h-12 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
       </svg>
       <h3 class="text-lg font-medium text-red-800 mb-2">Authentication Error</h3>
-      <p class="text-red-600 mb-4">{error}</p>
+      <p class="text-red-600 mb-4">{_error}</p>
       <button 
         on:click={() => window.location.reload()} 
         class="btn-secondary"
@@ -78,7 +78,7 @@ function handleSignIn() {
         Try Again
       </button>
     </div>
-  {:else if isAuthenticated}
+  {:else if _isAuthenticated}
     <!-- Authenticated State -->
     <div class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
       <svg class="w-12 h-12 text-green-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

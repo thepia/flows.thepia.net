@@ -36,11 +36,24 @@ cd flows.thepia.net
 # Install dependencies
 pnpm install
 
-# Start development server
+# Set up Let's Encrypt certificates (requires DNS control)
+# 1. Add DNS A record: dev.thepia.net → 127.0.0.1
+# 2. Run certificate generation:
+pnpm setup:letsencrypt
+# 3. Add DNS TXT record when prompted for validation
+# 4. Certificates will be in certs/ directory
+
+# Alternative: Quick local certificates with mkcert
+pnpm setup:https
+
+# Add to /etc/hosts file
+sudo sh -c 'echo "127.0.0.1 dev.thepia.net" >> /etc/hosts'
+
+# Start development server with HTTPS
 pnpm dev
 ```
 
-The development server runs on `dev.thepia.net:5176` for WebAuthn compatibility.
+The development server runs on `https://dev.thepia.net:5176` with HTTPS for WebAuthn and Supabase Auth compatibility.
 
 ### Available Scripts
 

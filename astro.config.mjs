@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import svelte from '@astrojs/svelte';
 import tailwindcss from '@tailwindcss/vite';
+import { getHttpsConfig, getServerConfig } from './scripts/dev-server.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -9,6 +10,7 @@ export default defineConfig({
   ],
   output: 'static',
   site: 'https://flows.thepia.net',
+  trailingSlash: 'ignore',
   build: {
     assets: 'assets',
   },
@@ -17,15 +19,20 @@ export default defineConfig({
       entrypoint: 'astro/assets/services/noop'
     }
   },
+  // Enable HTTPS for local development (required for WebAuthn in Safari)
+  server: getServerConfig(),
   vite: {
     plugins: [tailwindcss()],
     define: {
       __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
     },
     server: {
-      host: 'dev.thepia.net',
-      port: 5176,
-      https: false, // Will be handled by reverse proxy in production
+      https: getHttpsConfig(),
+      hmr: {
+        port: 5177,
+        host: 'localhost',
+        protocol: 'ws',
+      },
     },
   },
   experimental: {

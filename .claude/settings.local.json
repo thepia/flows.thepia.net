@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash:*)",
+      "Bash(node:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(npm test:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(VITEST_CONFIG=/Volumes/Projects/Thepia/thepia.com/vitest.config.js npx vitest run --config /Volumes/Projects/Thepia/thepia.com/vitest.config.js /Volumes/Projects/Thepia/thepia.com/tests/utils/spam-scoring.test.js)",
+      "Bash(git add:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(npm run coverage:*)",
+      "Bash(npm run:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm --dir /Volumes/Projects/Thepia/thepia.com test tests/pages/flows.test.js)",
+      "Bash(pnpm --dir /Volumes/Projects/Thepia/thepia.com test)",
+      "Bash(pnpm --dir /Volumes/Projects/Thepia/thepia.com test -- --reporter=verbose)",
+      "WebFetch(domain:docs.n8n.io)"
+    ],
+    "deny": []
+  }
+}

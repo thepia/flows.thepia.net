@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "description": "Public demo website for Thepia Flows with live database integration and passkey authentication",
   "scripts": {
-    "dev": "astro dev --host dev.thepia.net --port 5176",
+    "dev": "astro dev",
     "build": "astro check && astro build",
     "build:watch": "astro build --watch",
     "preview": "astro preview",
@@ -20,14 +20,18 @@
     "demo:start": "pnpm dev",
     "demo:reset": "echo 'Resetting demo state...'",
     "deploy:preview": "echo 'Deploying to GitHub Pages...'",
-    "deploy:production": "echo 'Deploying to Bunny CDN...'"
+    "deploy:production": "echo 'Deploying to Bunny CDN...'",
+    "setup:https": "./scripts/setup-https.sh",
+    "setup:letsencrypt": "./scripts/setup-letsencrypt-dev.sh"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
     "@astrojs/svelte": "^5.7.2",
+    "@supabase/supabase-js": "^2.50.5",
     "@tailwindcss/vite": "^4.1.10",
     "@thepia/branding": "^1.1.0",
     "astro": "^4.16.18",
+    "shadcn-svelte": "^1.0.6",
     "svelte": "^4.2.19",
     "tailwind-merge": "^3.3.0",
     "tailwindcss": "^4.1.10",
