@@ -18,8 +18,7 @@ const filterTabs = [
   { id: 'unresolved', name: 'Unresolved', badge: true },
   { id: 'all', name: 'All' },
   { id: 'requested', name: 'Requested', badge: true },
-  { id: 'pending', name: 'Pending', badge: true },
-  { id: 'approved', name: 'Approved' },
+  { id: 'approved', name: 'Approved', badge: true },
   { id: 'rejected', name: 'Rejected' },
   { id: 'sent', name: 'Sent' },
   { id: 'expired', name: 'Expired' },
@@ -33,11 +32,9 @@ $: filteredInvitations = Array.isArray(invitations) && activeFilter
 
       switch (activeFilter) {
         case 'unresolved':
-          return ['requested', 'pending'].includes(invitation.status);
+          return invitation.status === 'requested';
         case 'all':
           return true;
-        case 'pending':
-          return invitation.status === 'pending';
         case 'requested':
           return invitation.status === 'requested';
         case 'approved':
@@ -65,13 +62,11 @@ function getFilterCount(filterId: string) {
   return invitations.filter((invitation) => {
     switch (filterId) {
       case 'unresolved':
-        return ['requested', 'pending'].includes(invitation.status);
+        return invitation.status === 'requested';
       case 'all':
         return true;
       case 'requested':
         return invitation.status === 'requested';
-      case 'pending':
-        return invitation.status === 'pending';
       case 'approved':
         return invitation.status === 'approved';
       case 'rejected':
@@ -202,19 +197,282 @@ function handleFilterChange(event: CustomEvent<{ filterId: string }>) {
   activeFilter = event.detail.filterId;
 }
 
-function handleApprove(event: CustomEvent<{ invitation: any }>) {
-  console.log('Approve invitation:', event.detail.invitation);
-  // TODO: Implement approval logic
+async function handleApprove(event: CustomEvent<{ invitation: any }>) {
+  const invitation = event.detail.invitation;
+  console.log('Approve invitation:', invitation);
+  
+  try {
+    // 1. Update invitation status to approved
+    const { error: updateError } = await supabase
+      .from('invitations')
+      .update({
+        status: 'approved',
+        client_data: {
+          approved_by: $user?.email,
+          approved_at: new Date().toISOString(),
+        },
+      })
+      .eq('id', invitation.id);
+
+    if (updateError) throw updateError;
+
+    console.log('Invitation approved successfully');
+
+    // 2. Queue notification for email delivery
+    const { data: notificationResult, error: notificationError } = await supabase.rpc('queue_notification', {
+      invitation_id: invitation.id,
+      template_name: 'invitation_approved',
+      delivery_methods_array: ['email'],
+      template_variables: {
+        demo_duration: '14 days', // Default duration
+        access_url: generateInvitationAccessUrl(invitation),
+        admin_notes: ''
+      },
+      triggered_by: 'admin_approval'
+    });
+
+    if (notificationError) {
+      console.warn('Failed to queue notification:', notificationError);
+      await reportSupabaseError('invitations', 'rpc', notificationError, {
+        operation: 'queueNotification',
+        component: 'InvitationsViewSimple',
+        invitationId: invitation.id,
+      });
+    } else {
+      console.log('Notification queued successfully:', notificationResult);
+    }
+
+    // 3. Update local state
+    invitations = invitations.map((inv) =>
+      inv.id === invitation.id
+        ? { ...inv, status: 'approved' }
+        : inv
+    );
+
+    console.log('Approval process completed successfully');
+  } catch (err: any) {
+    console.error('Error approving invitation:', err);
+    error = getUserFriendlyErrorMessage(err, 'approving invitation');
+    
+    await reportSupabaseError('invitations', 'update', err, {
+      operation: 'handleApprove',
+      component: 'InvitationsViewSimple',
+      invitationId: invitation.id,
+    });
+  }
 }
 
-function handleReject(event: CustomEvent<{ invitation: any }>) {
-  console.log('Reject invitation:', event.detail.invitation);
-  // TODO: Implement rejection logic
+async function handleReject(event: CustomEvent<{ invitation: any }>) {
+  const invitation = event.detail.invitation;
+  console.log('Reject invitation:', invitation);
+  
+  try {
+    const { error: updateError } = await supabase
+      .from('invitations')
+      .update({
+        status: 'rejected',
+        client_data: {
+          rejected_by: $user?.email,
+          rejected_at: new Date().toISOString(),
+          rejection_reason: 'Manual rejection by admin',
+        },
+      })
+      .eq('id', invitation.id);
+
+    if (updateError) throw updateError;
+
+    // Update local state
+    invitations = invitations.map((inv) =>
+      inv.id === invitation.id
+        ? { ...inv, status: 'rejected' }
+        : inv
+    );
+
+    console.log('Invitation rejected successfully');
+  } catch (err: any) {
+    console.error('Error rejecting invitation:', err);
+    error = getUserFriendlyErrorMessage(err, 'rejecting invitation');
+    
+    await reportSupabaseError('invitations', 'update', err, {
+      operation: 'handleReject',
+      component: 'InvitationsViewSimple',
+      invitationId: invitation.id,
+    });
+  }
 }
 
-function handleUpdateStatus(event: CustomEvent<{ id: string, status: string }>) {
-  console.log('Update status:', event.detail);
-  // TODO: Implement status update logic
+async function handleUpdateStatus(event: CustomEvent<{ id: string, status: string }>) {
+  const { id, status } = event.detail;
+  console.log('Update status:', { id, status });
+  
+  try {
+    const { error } = await supabase
+      .from('invitations')
+      .update({ status })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    // Update local state
+    invitations = invitations.map((inv) =>
+      inv.id === id ? { ...inv, status } : inv
+    );
+
+    console.log('Status updated successfully');
+  } catch (err: any) {
+    console.error('Error updating status:', err);
+    error = `Failed to update status: ${err.message}`;
+  }
+}
+
+// Generate invitation access URL from JWT token
+function generateInvitationAccessUrl(invitation) {
+  const baseUrl = window.location.origin;
+  const accessToken = invitation.jwt_token || invitation.invitation_code;
+  return `${baseUrl}/demo?token=${encodeURIComponent(accessToken)}`;
+}
+
+// User-friendly error message transformation
+function getUserFriendlyErrorMessage(err: any, operation: string): string {
+  const message = err.message || '';
+
+  if (message.includes('permission denied') || message.includes('RLS')) {
+    return 'Access denied. Please check your permissions or contact support.';
+  }
+  if (message.includes('network') || message.includes('fetch')) {
+    return 'Network error. Please check your connection and try again.';
+  }
+  if (message.includes('timeout')) {
+    return 'Request timed out. Please try again.';
+  }
+  if (message.includes('duplicate') || message.includes('unique constraint')) {
+    return 'This record already exists.';
+  }
+
+  const operationMessages = {
+    'loading invitations': 'Failed to load invitations. Please refresh the page.',
+    'creating invitation': 'Failed to create invitation. Please try again.',
+    'approving invitation': 'Failed to approve invitation. Please try again.',
+    'rejecting invitation': 'Failed to reject invitation. Please try again.',
+  };
+
+  return operationMessages[operation] || 'An error occurred. Please try again.';
+}
+
+// Status badge styling
+function getStatusBadgeClass(status: string) {
+  const baseClass = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+  switch (status) {
+    case 'requested':
+      return `${baseClass} bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300`;
+    case 'pending':
+      return `${baseClass} bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300`;
+    case 'approved':
+      return `${baseClass} bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300`;
+    case 'rejected':
+      return `${baseClass} bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300`;
+    case 'sent':
+      return `${baseClass} bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300`;
+    case 'opened':
+      return `${baseClass} bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300`;
+    case 'used':
+      return `${baseClass} bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300`;
+    case 'expired':
+      return `${baseClass} bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300`;
+    default:
+      return `${baseClass} bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300`;
+  }
+}
+
+// Notification status badge styling
+function getNotificationStatusBadgeClass(notificationStatus: string) {
+  const baseClass = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium';
+  switch (notificationStatus) {
+    case 'pending':
+      return `${baseClass} bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300`;
+    case 'processing':
+      return `${baseClass} bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300`;
+    case 'sent':
+      return `${baseClass} bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300`;
+    case 'failed':
+      return `${baseClass} bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300`;
+    case 'retry_scheduled':
+      return `${baseClass} bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300`;
+    case 'reminder_due':
+      return `${baseClass} bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300`;
+    case 'cancelled':
+      return `${baseClass} bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300`;
+    default:
+      return `${baseClass} bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300`;
+  }
+}
+
+// Date formatting
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+// Trigger immediate notification processing
+async function triggerNotificationProcessor() {
+  try {
+    const { error } = await supabase.rpc('trigger_notification_processing');
+    if (error) throw error;
+  } catch (error) {
+    console.warn('Failed to trigger notification processor:', error);
+    throw error;
+  }
+}
+
+// Manually trigger notification for specific invitation
+async function manuallyTriggerNotification(invitationId: string) {
+  try {
+    const { error } = await supabase.rpc('trigger_notification_processing', {
+      invitation_id: invitationId,
+      force_retry: true
+    });
+
+    if (error) throw error;
+
+    invitations = invitations.map((inv) =>
+      inv.id === invitationId
+        ? { ...inv, notification_status: 'pending' }
+        : inv
+    );
+
+    await triggerNotificationProcessor();
+    console.log('Manual notification trigger successful for invitation:', invitationId);
+  } catch (err: any) {
+    error = getUserFriendlyErrorMessage(err, 'triggering notification');
+    console.error('Error manually triggering notification:', err);
+    
+    await reportSupabaseError('invitations', 'rpc', err, {
+      operation: 'manuallyTriggerNotification',
+      component: 'InvitationsViewSimple',
+      invitationId: invitationId,
+    });
+  }
+}
+
+// Load notification queue statistics
+async function loadNotificationStats() {
+  try {
+    const { data, error } = await supabase.rpc('get_notification_stats');
+    if (error) throw error;
+    console.log('Notification statistics loaded:', data);
+    return data;
+  } catch (err: any) {
+    console.error('Error loading notification stats:', err);
+    await reportSupabaseError('invitations', 'rpc', err, {
+      operation: 'loadNotificationStats',
+      component: 'InvitationsViewSimple',
+    });
+  }
 }
 </script>
 
