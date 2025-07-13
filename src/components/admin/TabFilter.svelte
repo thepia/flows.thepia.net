@@ -11,10 +11,14 @@ const dispatch = createEventDispatcher<{
 }>();
 
 // Create reactive counts based on invitations array
-$: counts = tabs.reduce((acc, tab) => {
-  acc[tab.id] = getFilterCount(tab.id);
+$: counts = invitations.length >= 0 ? tabs.reduce((acc, tab) => {
+  const count = getFilterCount(tab.id);
+  console.log(`Tab ${tab.id} has ${count} items`);
+  acc[tab.id] = count;
   return acc;
-}, {} as Record<string, number>);
+}, {} as Record<string, number>) : {};
+
+$: console.log('TabFilter counts:', counts, 'invitations length:', invitations.length);
 
 function handleTabClick(tabId: string) {
   dispatch('filterChange', { filterId: tabId });
@@ -35,14 +39,18 @@ function handleTabClick(tabId: string) {
             }"
         >
           {tab.name}
-          {#if tab.badge && counts[tab.id] > 0}
-            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-              {activeFilter === tab.id
-                ? 'bg-blue-100 text-blue-600'
-                : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-300'
-              }">
-              {counts[tab.id]}
-            </span>
+          {#if tab.badge}
+            {#if counts[tab.id] !== undefined}
+              <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                {activeFilter === tab.id
+                  ? 'bg-blue-100 text-blue-600'
+                  : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-300'
+                }">
+                {counts[tab.id] || 0}
+              </span>
+            {:else}
+              <span class="ml-2 text-xs text-red-500">?</span>
+            {/if}
           {/if}
         </button>
       {/each}

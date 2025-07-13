@@ -31,6 +31,21 @@ interface ErrorReport {
 }
 
 export const POST: APIRoute = async ({ request }) => {
+  // Dev-only endpoint - return 404 in production
+  if (import.meta.env.PROD) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Error reporting endpoint is only available in development",
+        message: "This endpoint is disabled in production builds",
+      }),
+      {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  }
+
   try {
     const errorReport: ErrorReport = await request.json();
 
@@ -149,6 +164,21 @@ export const POST: APIRoute = async ({ request }) => {
 
 // GET endpoint for health check
 export const GET: APIRoute = async () => {
+  // Dev-only endpoint - return 404 in production
+  if (import.meta.env.PROD) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Error reporting endpoint is only available in development",
+        message: "This endpoint is disabled in production builds",
+      }),
+      {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  }
+
   return new Response(
     JSON.stringify({
       status: 'healthy',
@@ -174,6 +204,11 @@ export const GET: APIRoute = async () => {
 
 // OPTIONS endpoint for CORS preflight
 export const OPTIONS: APIRoute = async () => {
+  // Dev-only endpoint - return 404 in production
+  if (import.meta.env.PROD) {
+    return new Response(null, { status: 404 });
+  }
+
   return new Response(null, {
     status: 200,
     headers: {

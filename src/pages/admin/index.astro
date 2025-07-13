@@ -1,5 +1,6 @@
 ---
 import AdminApp from '../../components/admin/AdminApp.svelte';
+import FloatingSupportButton from '../../components/debug/FloatingSupportButton.svelte';
 import Layout from '../../layouts/Layout.astro';
 
 // Page metadata
@@ -11,5 +12,6 @@ const description = 'Administrative interface for managing demo invitations and 
   <main class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Client-side Svelte Admin App -->
     <AdminApp client:load />
+  <FloatingSupportButton client:load />
   </main>
 </Layout>
