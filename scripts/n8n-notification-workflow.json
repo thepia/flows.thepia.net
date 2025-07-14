@@ -1,0 +1,277 @@
+{
+  "name": "Thepia Flows - Unified Notification Processor",
+  "nodes": [
+    {
+      "parameters": {
+        "unit": "minutes",
+        "value": 5
+      },
+      "id": "schedule-trigger",
+      "name": "Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "resource": "rpc",
+        "operation": "invoke",
+        "function": {
+          "__rl": true,
+          "value": "get_pending_notifications",
+          "mode": "name"
+        },
+        "parameters": "{}"
+      },
+      "id": "get-notifications",
+      "name": "Get Pending Notifications",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [440, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase - Thepia Flows"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      },
+      "id": "batch-processor",
+      "name": "Process in Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Copy the entire n8n-notification-processor.js content here\n// For brevity, showing simplified version\n\nconst processNotification = (notification) => {\n  try {\n    // Decode JWT\n    const parts = notification.jwt_token.split('.');\n    if (parts.length !== 3) throw new Error('Invalid JWT');\n    \n    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());\n    \n    // Prepare email data\n    const emailData = {\n      notification_id: notification.id,\n      to: payload.email,\n      subject: 'Your Thepia Flows Demo Access is Ready!',\n      template: notification.message_template || 'invitation_approved',\n      templateData: {\n        name: payload.name || payload.firstName || 'Guest',\n        email: payload.email,\n        company: payload.company || '',\n        demo_duration: notification.template_data?.demo_duration || '14 days',\n        access_url: notification.template_data?.access_url || `https://flows.thepia.net/demo?token=${encodeURIComponent(notification.jwt_token)}`,\n        expires_at: new Date(notification.expires_at).toLocaleDateString()\n      }\n    };\n    \n    return emailData;\n  } catch (error) {\n    return {\n      error: true,\n      notification_id: notification.id,\n      error_message: error.message\n    };\n  }\n};\n\n// Process each notification\nconst output = [];\nfor (const item of $input.all()) {\n  const processed = processNotification(item.json);\n  output.push({ json: processed });\n}\n\nreturn output;"
+      },
+      "id": "process-notification",
+      "name": "Process Notification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [840, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.error}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-error",
+      "name": "Has Error?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1040, 300]
+    },
+    {
+      "parameters": {
+        "resource": "rpc",
+        "operation": "invoke", 
+        "function": {
+          "__rl": true,
+          "value": "mark_notification_processing",
+          "mode": "name"
+        },
+        "parameters": "={\n  \"invitation_id\": \"{{$json.notification_id}}\"\n}"
+      },
+      "id": "mark-processing",
+      "name": "Mark as Processing",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1240, 200],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase - Thepia Flows"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"personalizations\": [{\n    \"to\": [{\"email\": \"{{$json.to}}\"}],\n    \"dynamic_template_data\": {{JSON.stringify($json.templateData)}}\n  }],\n  \"from\": {\n    \"email\": \"noreply@thepia.com\",\n    \"name\": \"Thepia Flows\"\n  },\n  \"reply_to\": {\n    \"email\": \"support@thepia.com\",\n    \"name\": \"Thepia Support\"\n  },\n  \"template_id\": \"{{$json.template === 'invitation_approved' ? 'd-xxxxx' : 'd-yyyyy'}}\",\n  \"custom_args\": {\n    \"notification_id\": \"{{$json.notification_id}}\"\n  }\n}",
+        "url": "https://api.sendgrid.com/v3/mail/send",
+        "options": {}
+      },
+      "id": "send-email",
+      "name": "Send Email (SendGrid)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1440, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "2",
+          "name": "SendGrid API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "rpc",
+        "operation": "invoke",
+        "function": {
+          "__rl": true,
+          "value": "mark_notification_sent",
+          "mode": "name"
+        },
+        "parameters": "={\n  \"invitation_id\": \"{{$json.notification_id}}\",\n  \"delivery_method\": \"email\",\n  \"service_message_id\": \"{{$response.headers['x-message-id'] || 'n8n-' + Date.now()}}\"\n}"
+      },
+      "id": "mark-sent",
+      "name": "Mark as Sent",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1640, 200],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase - Thepia Flows"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "rpc",
+        "operation": "invoke",
+        "function": {
+          "__rl": true,
+          "value": "mark_notification_failed",
+          "mode": "name"
+        },
+        "parameters": "={\n  \"invitation_id\": \"{{$json.notification_id}}\",\n  \"delivery_method\": \"email\",\n  \"error_message\": \"{{$json.error_message || 'Processing error'}}\"\n}"
+      },
+      "id": "mark-failed",
+      "name": "Mark as Failed",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1240, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase - Thepia Flows"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Thepia Flows - Unified Notification Processor\\n\\nThis workflow:\\n1. Runs every 5 minutes\\n2. Gets pending notifications from the queue\\n3. Processes them in batches of 10\\n4. Decodes JWT tokens to get email addresses\\n5. Sends emails via SendGrid\\n6. Updates notification status\\n\\n### Setup Required:\\n1. Configure Supabase credentials\\n2. Configure SendGrid API key\\n3. Update SendGrid template IDs\\n4. Test with a single notification first\\n\\n### Monitoring:\\nCheck the execution history for any failures",
+        "height": 293.5234375,
+        "width": 389.50260416666674
+      },
+      "id": "sticky-note",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [160, 140]
+    }
+  ],
+  "connections": {
+    "Every 5 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Get Pending Notifications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Pending Notifications": {
+      "main": [
+        [
+          {
+            "node": "Process in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process in Batches": {
+      "main": [
+        [
+          {
+            "node": "Process Notification",
+            "type": "main", 
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Notification": {
+      "main": [
+        [
+          {
+            "node": "Has Error?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Error?": {
+      "main": [
+        [
+          {
+            "node": "Mark as Processing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark as Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as Processing": {
+      "main": [
+        [
+          {
+            "node": "Send Email (SendGrid)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email (SendGrid)": {
+      "main": [
+        [
+          {
+            "node": "Mark as Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "id": "thepia-flows-notifications"
+}

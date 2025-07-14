@@ -36,13 +36,13 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: "Error reporting endpoint is only available in development",
-        message: "This endpoint is disabled in production builds",
+        error: 'Error reporting endpoint is only available in development',
+        message: 'This endpoint is disabled in production builds',
       }),
       {
         status: 404,
-        headers: { "Content-Type": "application/json" },
-      },
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   }
 
@@ -169,13 +169,13 @@ export const GET: APIRoute = async () => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: "Error reporting endpoint is only available in development",
-        message: "This endpoint is disabled in production builds",
+        error: 'Error reporting endpoint is only available in development',
+        message: 'This endpoint is disabled in production builds',
       }),
       {
         status: 404,
-        headers: { "Content-Type": "application/json" },
-      },
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   }
 

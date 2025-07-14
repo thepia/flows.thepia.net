@@ -3,8 +3,8 @@ import { onMount } from 'svelte';
 import { reportSupabaseError } from '../../lib/config/errorReporting.js';
 import { supabase } from '../../lib/supabase.js';
 import { user } from '../../stores/auth.ts';
-import TabFilter from './TabFilter.svelte';
 import InvitationCard from './InvitationCard.svelte';
+import TabFilter from './TabFilter.svelte';
 
 let invitations: any[] = [];
 let loading = true;
@@ -20,38 +20,39 @@ const filterTabs = [
   { id: 'requested', name: 'Requested', badge: true },
   { id: 'approved', name: 'Approved', badge: true },
   { id: 'rejected', name: 'Rejected' },
-  { id: 'sent', name: 'Sent' },
+  { id: 'sent', name: 'Sent', badge: true },
   { id: 'expired', name: 'Expired' },
   { id: 'used', name: 'Used' },
 ];
 
 // Simple filtering logic
-$: filteredInvitations = Array.isArray(invitations) && activeFilter
-  ? invitations.filter((invitation) => {
-      if (!invitation || !invitation.status) return false;
+$: filteredInvitations =
+  Array.isArray(invitations) && activeFilter
+    ? invitations.filter((invitation) => {
+        if (!invitation || !invitation.status) return false;
 
-      switch (activeFilter) {
-        case 'unresolved':
-          return invitation.status === 'requested';
-        case 'all':
-          return true;
-        case 'requested':
-          return invitation.status === 'requested';
-        case 'approved':
-          return invitation.status === 'approved';
-        case 'rejected':
-          return invitation.status === 'rejected';
-        case 'sent':
-          return invitation.status === 'sent';
-        case 'expired':
-          return invitation.status === 'expired';
-        case 'used':
-          return invitation.status === 'used';
-        default:
-          return true;
-      }
-    })
-  : [];
+        switch (activeFilter) {
+          case 'unresolved':
+            return invitation.status === 'requested';
+          case 'all':
+            return true;
+          case 'requested':
+            return invitation.status === 'requested';
+          case 'approved':
+            return invitation.status === 'approved';
+          case 'rejected':
+            return invitation.status === 'rejected';
+          case 'sent':
+            return invitation.status === 'sent';
+          case 'expired':
+            return invitation.status === 'expired';
+          case 'used':
+            return invitation.status === 'used';
+          default:
+            return true;
+        }
+      })
+    : [];
 
 onMount(() => {
   loadInvitations();
@@ -181,7 +182,8 @@ function decodeInvitationData(invitation: any) {
     last_used_at: invitation.last_used_at,
     email: decodedData.email || invitation.email || 'Not available',
     name: decodedData.name || invitation.name || decodedData.firstName || 'Not available',
-    company: decodedData.company || invitation.company || decodedData.companyName || 'Not available',
+    company:
+      decodedData.company || invitation.company || decodedData.companyName || 'Not available',
     workflow_type: invitation.workflow_type || decodedData.workflow_type || 'Unknown',
     demo_duration: invitation.demo_duration || decodedData.demo_duration || 'Unknown',
     comment: invitation.comment || decodedData.comment || null,
@@ -197,10 +199,10 @@ function handleFilterChange(event: CustomEvent<{ filterId: string }>) {
   activeFilter = event.detail.filterId;
 }
 
-async function handleApprove(event: CustomEvent<{ invitation: any }>) {
+async function _handleApprove(event: CustomEvent<{ invitation: any }>) {
   const invitation = event.detail.invitation;
   console.log('Approve invitation:', invitation);
-  
+
   try {
     // 1. Update invitation status to approved
     const { error: updateError } = await supabase
@@ -219,17 +221,20 @@ async function handleApprove(event: CustomEvent<{ invitation: any }>) {
     console.log('Invitation approved successfully');
 
     // 2. Queue notification for email delivery
-    const { data: notificationResult, error: notificationError } = await supabase.rpc('queue_notification', {
-      invitation_id: invitation.id,
-      template_name: 'invitation_approved',
-      delivery_methods_array: ['email'],
-      template_variables: {
-        demo_duration: '14 days', // Default duration
-        access_url: generateInvitationAccessUrl(invitation),
-        admin_notes: ''
-      },
-      triggered_by: 'admin_approval'
-    });
+    const { data: notificationResult, error: notificationError } = await supabase.rpc(
+      'queue_notification',
+      {
+        invitation_id: invitation.id,
+        template_name: 'invitation_approved',
+        delivery_methods_array: ['email'],
+        template_variables: {
+          demo_duration: '14 days', // Default duration
+          access_url: generateInvitationAccessUrl(invitation),
+          admin_notes: '',
+        },
+        triggered_by: 'admin_approval',
+      }
+    );
 
     if (notificationError) {
       console.warn('Failed to queue notification:', notificationError);
@@ -244,16 +249,14 @@ async function handleApprove(event: CustomEvent<{ invitation: any }>) {
 
     // 3. Update local state
     invitations = invitations.map((inv) =>
-      inv.id === invitation.id
-        ? { ...inv, status: 'approved' }
-        : inv
+      inv.id === invitation.id ? { ...inv, status: 'approved' } : inv
     );
 
     console.log('Approval process completed successfully');
   } catch (err: any) {
     console.error('Error approving invitation:', err);
     error = getUserFriendlyErrorMessage(err, 'approving invitation');
-    
+
     await reportSupabaseError('invitations', 'update', err, {
       operation: 'handleApprove',
       component: 'InvitationsViewSimple',
@@ -262,10 +265,10 @@ async function handleApprove(event: CustomEvent<{ invitation: any }>) {
   }
 }
 
-async function handleReject(event: CustomEvent<{ invitation: any }>) {
+async function _handleReject(event: CustomEvent<{ invitation: any }>) {
   const invitation = event.detail.invitation;
   console.log('Reject invitation:', invitation);
-  
+
   try {
     const { error: updateError } = await supabase
       .from('invitations')
@@ -283,16 +286,14 @@ async function handleReject(event: CustomEvent<{ invitation: any }>) {
 
     // Update local state
     invitations = invitations.map((inv) =>
-      inv.id === invitation.id
-        ? { ...inv, status: 'rejected' }
-        : inv
+      inv.id === invitation.id ? { ...inv, status: 'rejected' } : inv
     );
 
     console.log('Invitation rejected successfully');
   } catch (err: any) {
     console.error('Error rejecting invitation:', err);
     error = getUserFriendlyErrorMessage(err, 'rejecting invitation');
-    
+
     await reportSupabaseError('invitations', 'update', err, {
       operation: 'handleReject',
       component: 'InvitationsViewSimple',
@@ -301,22 +302,17 @@ async function handleReject(event: CustomEvent<{ invitation: any }>) {
   }
 }
 
-async function handleUpdateStatus(event: CustomEvent<{ id: string, status: string }>) {
+async function _handleUpdateStatus(event: CustomEvent<{ id: string; status: string }>) {
   const { id, status } = event.detail;
   console.log('Update status:', { id, status });
-  
+
   try {
-    const { error } = await supabase
-      .from('invitations')
-      .update({ status })
-      .eq('id', id);
+    const { error } = await supabase.from('invitations').update({ status }).eq('id', id);
 
     if (error) throw error;
 
     // Update local state
-    invitations = invitations.map((inv) =>
-      inv.id === id ? { ...inv, status } : inv
-    );
+    invitations = invitations.map((inv) => (inv.id === id ? { ...inv, status } : inv));
 
     console.log('Status updated successfully');
   } catch (err: any) {
@@ -360,7 +356,7 @@ function getUserFriendlyErrorMessage(err: any, operation: string): string {
 }
 
 // Status badge styling
-function getStatusBadgeClass(status: string) {
+function _getStatusBadgeClass(status: string) {
   const baseClass = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
   switch (status) {
     case 'requested':
@@ -385,7 +381,7 @@ function getStatusBadgeClass(status: string) {
 }
 
 // Notification status badge styling
-function getNotificationStatusBadgeClass(notificationStatus: string) {
+function _getNotificationStatusBadgeClass(notificationStatus: string) {
   const baseClass = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium';
   switch (notificationStatus) {
     case 'pending':
@@ -408,7 +404,7 @@ function getNotificationStatusBadgeClass(notificationStatus: string) {
 }
 
 // Date formatting
-function formatDate(dateString: string) {
+function _formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -430,19 +426,17 @@ async function triggerNotificationProcessor() {
 }
 
 // Manually trigger notification for specific invitation
-async function manuallyTriggerNotification(invitationId: string) {
+async function _manuallyTriggerNotification(invitationId: string) {
   try {
     const { error } = await supabase.rpc('trigger_notification_processing', {
       invitation_id: invitationId,
-      force_retry: true
+      force_retry: true,
     });
 
     if (error) throw error;
 
     invitations = invitations.map((inv) =>
-      inv.id === invitationId
-        ? { ...inv, notification_status: 'pending' }
-        : inv
+      inv.id === invitationId ? { ...inv, notification_status: 'pending' } : inv
     );
 
     await triggerNotificationProcessor();
@@ -450,7 +444,7 @@ async function manuallyTriggerNotification(invitationId: string) {
   } catch (err: any) {
     error = getUserFriendlyErrorMessage(err, 'triggering notification');
     console.error('Error manually triggering notification:', err);
-    
+
     await reportSupabaseError('invitations', 'rpc', err, {
       operation: 'manuallyTriggerNotification',
       component: 'InvitationsViewSimple',
@@ -460,7 +454,7 @@ async function manuallyTriggerNotification(invitationId: string) {
 }
 
 // Load notification queue statistics
-async function loadNotificationStats() {
+async function _loadNotificationStats() {
   try {
     const { data, error } = await supabase.rpc('get_notification_stats');
     if (error) throw error;
@@ -471,6 +465,53 @@ async function loadNotificationStats() {
     await reportSupabaseError('invitations', 'rpc', err, {
       operation: 'loadNotificationStats',
       component: 'InvitationsViewSimple',
+    });
+  }
+}
+
+// Handle email sent from InvitationCard
+async function handleEmailSent(
+  event: CustomEvent<{ invitation: any; result: any; isResend?: boolean }>
+) {
+  const { invitation, result, isResend = false } = event.detail;
+  console.log(`Email ${isResend ? 'resent' : 'sent'} for invitation:`, invitation.id, result);
+
+  try {
+    // Mark the notification as sent in the database
+    if (result.success && result.messageId) {
+      const { error: markSentError } = await supabase.rpc('mark_notification_sent', {
+        invitation_id: invitation.id,
+        delivery_method: 'email',
+        service_message_id: result.messageId,
+      });
+
+      if (markSentError) {
+        console.warn('Failed to mark notification as sent in database:', markSentError);
+      } else {
+        console.log('Notification marked as sent in database');
+
+        // Update local state to reflect the email was sent
+        invitations = invitations.map((inv) =>
+          inv.id === invitation.id
+            ? {
+                ...inv,
+                status: 'sent',
+                notification_status: 'sent',
+                notification_completed_at: new Date().toISOString(),
+                email_sent: true,
+                email_sent_at: new Date().toISOString(),
+                email_id: result.messageId,
+              }
+            : inv
+        );
+      }
+    }
+  } catch (err: any) {
+    console.error('Error updating notification status after email sent:', err);
+    await reportSupabaseError('invitations', 'rpc', err, {
+      operation: 'handleEmailSent',
+      component: 'InvitationsViewSimple',
+      invitationId: invitation.id,
     });
   }
 }
@@ -564,9 +605,10 @@ async function loadNotificationStats() {
           <InvitationCard
             {invitation}
             inviteData={decodeInvitationData(invitation)}
-            on:approve={handleApprove}
-            on:reject={handleReject}
-            on:updateStatus={handleUpdateStatus}
+            on:approve={_handleApprove}
+            on:reject={_handleReject}
+            on:updateStatus={_handleUpdateStatus}
+            on:emailSent={handleEmailSent}
           />
         {/each}
       </div>

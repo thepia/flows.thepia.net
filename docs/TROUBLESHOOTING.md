@@ -99,3 +99,10 @@ For additional issues:
 2. Check network tab for failed API requests  
 3. Verify user role assignment via flows-db CLI tools
 4. Review RLS policies in Supabase dashboard
+
+
+## Amazon SES Configuration
+
+- [Amazon SES Identities](https://eu-north-1.console.aws.amazon.com/ses/home?region=eu-north-1#/identities)
+- [Console Home](https://eu-north-1.console.aws.amazon.com/console/home?nc2=h_si&region=eu-north-1&src=header-signin#)
+

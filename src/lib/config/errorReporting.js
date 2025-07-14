@@ -12,12 +12,13 @@ const browser = typeof window !== 'undefined';
  * Error reporting endpoints for different environments
  * Default to local demo server, fallback to disabled
  */
-const _ERROR_REPORTING_ENDPOINTS = {
-  // Local demo server (default for development)
-  localDemo: null, // Will be set dynamically to current dev server
-  // Production: Intentionally not implemented yet (needs throttling/protection design)
-  productionApi: null, // Not implemented - requires throttling and protection strategy
-};
+// Unused error reporting endpoints - keeping for future implementation
+// const _ERROR_REPORTING_ENDPOINTS = {
+//   // Local demo server (default for development)
+//   localDemo: null, // Will be set dynamically to current dev server
+//   // Production: Intentionally not implemented yet (needs throttling/protection design)
+//   productionApi: null, // Not implemented - requires throttling and protection strategy
+// };
 
 /**
  * Get the local demo server error reporting endpoint

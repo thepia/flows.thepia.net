@@ -1,14 +1,20 @@
 <script lang="ts">
 import { createEventDispatcher } from 'svelte';
+import { checkEmailService, sendInvitationEmail } from '../../lib/utils/emailSender';
 
 export let invitation: any;
 export let inviteData: any;
 
 const dispatch = createEventDispatcher<{
-  approve: { invitation: any },
-  reject: { invitation: any },
-  updateStatus: { id: string, status: string }
+  approve: { invitation: any };
+  reject: { invitation: any };
+  updateStatus: { id: string; status: string };
+  emailSent: { invitation: any; result: any };
 }>();
+
+let sendingEmail = false;
+let emailError: string | null = null;
+let emailSuccess: string | null = null;
 
 function getStatusBadgeClass(status: string) {
   const baseClass = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
@@ -42,6 +48,43 @@ function formatDate(dateString: string) {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+async function handleSendEmail() {
+  if (sendingEmail) return;
+
+  // Clear previous messages
+  emailError = null;
+  emailSuccess = null;
+  sendingEmail = true;
+
+  try {
+    const isResend = invitation.status === 'sent';
+    console.log(`${isResend ? 'Resending' : 'Sending'} email for invitation:`, invitation.id);
+
+    const result = await sendInvitationEmail(invitation, 'invitation_approved');
+
+    if (result.success) {
+      emailSuccess = `Email ${isResend ? 'resent' : 'sent'} successfully! Message ID: ${result.messageId}`;
+      console.log(`Email ${isResend ? 'resent' : 'sent'} successfully:`, result);
+
+      // Notify parent component
+      dispatch('emailSent', { invitation, result, isResend });
+
+      // Clear success message after 5 seconds
+      setTimeout(() => {
+        emailSuccess = null;
+      }, 5000);
+    } else {
+      emailError = result.error || 'Failed to send email';
+      console.error('Email sending failed:', result);
+    }
+  } catch (error: any) {
+    emailError = error.message || 'Failed to send email';
+    console.error('Email sending error:', error);
+  } finally {
+    sendingEmail = false;
+  }
 }
 
 function getNotificationStatusBadgeClass(notificationStatus: string) {
@@ -145,6 +188,19 @@ function getNotificationStatusBadgeClass(notificationStatus: string) {
           </div>
         {/if}
         
+        <!-- Email Status Messages -->
+        {#if emailSuccess}
+          <div class="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800">
+            <div class="text-green-800 dark:text-green-200 text-sm">✅ {emailSuccess}</div>
+          </div>
+        {/if}
+        
+        {#if emailError}
+          <div class="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800">
+            <div class="text-red-800 dark:text-red-200 text-sm">❌ {emailError}</div>
+          </div>
+        {/if}
+        
         {#if inviteData.comment}
           <div class="mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-300">
             "{inviteData.comment}"
@@ -178,6 +234,28 @@ function getNotificationStatusBadgeClass(notificationStatus: string) {
           class="px-3 py-1 text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/40 rounded-md transition-colors"
         >
           Reject
+        </button>
+      {/if}
+      
+      <!-- Email Actions for approved invitations -->
+      {#if invitation.status === 'approved' && invitation.jwt_token}
+        <button
+          on:click={handleSendEmail}
+          disabled={sendingEmail}
+          class="px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/40 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {sendingEmail ? 'Sending...' : '📧 Send Email'}
+        </button>
+      {/if}
+      
+      <!-- Resend Email for sent invitations -->
+      {#if invitation.status === 'sent' && invitation.jwt_token}
+        <button
+          on:click={handleSendEmail}
+          disabled={sendingEmail}
+          class="px-3 py-1 text-sm font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:hover:bg-purple-900/40 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {sendingEmail ? 'Sending...' : '🔄 Resend Email'}
         </button>
       {/if}
       

@@ -1,13 +1,12 @@
 <script>
 import { onMount, onDestroy } from 'svelte';
-
-// Thepia brand colors from @thepia/branding package
-const thepiaColors = {
-  primary: '#988ACA',      // Primary lavender
-  primaryLight: '#B5A9D9', // Light variant
-  primaryDark: '#7B6BB7',  // Dark variant
-  primaryDarker: '#654CA3' // Darker variant
-};
+import { 
+  Activity, 
+  AlertCircle, 
+  CheckCircle2, 
+  XCircle
+} from 'lucide-svelte';
+import { thepiaColors } from '@thepia/branding';
 
 let showPopover = false;
 let activeTab = 'chat';

@@ -101,7 +101,7 @@ class FlowsErrorReporter {
 
     let response: Response;
     try {
-      response = await fetch(this.config.endpoint!, {
+      response = await fetch(this.config.endpoint as string, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload),
@@ -129,7 +129,7 @@ class FlowsErrorReporter {
     const failedRetries: { event: FlowsErrorReportEvent; attempts: number }[] = [];
 
     for (const { event, attempts } of this.retryQueue) {
-      if (attempts >= this.config.maxRetries!) {
+      if (attempts >= (this.config.maxRetries as number)) {
         if (this.config.debug) {
           console.warn('📊 [FlowsErrorReporter] Max retries reached for event:', event);
         }

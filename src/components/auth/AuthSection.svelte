@@ -49,7 +49,7 @@ onMount(async () => {
   }
 });
 
-function handleSignIn() {
+function _handleSignIn() {
   if (authStore) {
     authStore.signIn();
   }

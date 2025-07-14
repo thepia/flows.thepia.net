@@ -1,0 +1,52 @@
+---
+// Main app page - Shows authenticated content
+import DemoContent from '../demo/DemoContent.svelte';
+import Layout from '../layouts/Layout.astro';
+export const prerender = false; // Dynamic page for auth state
+---
+
+<Layout title="Thepia Flows - Dashboard">
+  <main class="app-main">
+    <div class="app-placeholder">
+      <h1>Welcome to Thepia Flows</h1>
+      <p>You are now signed in. The full app experience would load here.</p>
+      
+      <!-- For now, show the demo content -->
+      <div class="demo-content-wrapper">
+        <DemoContent client:only="svelte" currentUser={null} />
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .app-main {
+    min-height: 100vh;
+    background: #f9fafb;
+  }
+
+  .app-placeholder {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .app-placeholder h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .app-placeholder p {
+    color: #6b7280;
+    margin-bottom: 2rem;
+  }
+
+  .demo-content-wrapper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+  }
+</style>

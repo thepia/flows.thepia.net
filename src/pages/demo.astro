@@ -1,0 +1,43 @@
+---
+// App page with authentication - Full-screen app experience
+import '../styles/global.css';
+import AppSignIn from '../components/app/AppSignIn.svelte';
+import FloatingSupportButton from '../components/debug/FloatingSupportButton.svelte';
+import { thepiaColors } from '@thepia/branding';
+export const prerender = false; // Dynamic page for auth
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Sign in to Thepia Flows" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Thepia Flows</title>
+    <style is:global define:vars={{primary: thepiaColors.primary, primaryDark: thepiaColors.primaryDark, secondary: thepiaColors.secondary}}>
+      :root {
+        --thepia-primary: var(--primary);
+        --thepia-primary-600: var(--primaryDark);
+        --thepia-secondary: var(--secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <AppSignIn client:only="svelte" />
+    <FloatingSupportButton client:only="svelte" />
+  </body>
+</html>
+
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    background-color: #fafafa;
+  }
+</style>

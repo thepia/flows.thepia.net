@@ -1,22 +1,28 @@
 <script lang="ts">
 import { createEventDispatcher } from 'svelte';
 
-export let tabs: Array<{id: string, name: string, badge?: boolean}> = [];
-export let activeFilter: string = '';
+export let tabs: Array<{ id: string; name: string; badge?: boolean }> = [];
+export let activeFilter = '';
 export let getFilterCount: (filterId: string) => number;
 export let invitations: any[] = []; // Add this to trigger reactivity
 
 const dispatch = createEventDispatcher<{
-  filterChange: { filterId: string }
+  filterChange: { filterId: string };
 }>();
 
 // Create reactive counts based on invitations array
-$: counts = invitations.length >= 0 ? tabs.reduce((acc, tab) => {
-  const count = getFilterCount(tab.id);
-  console.log(`Tab ${tab.id} has ${count} items`);
-  acc[tab.id] = count;
-  return acc;
-}, {} as Record<string, number>) : {};
+$: counts =
+  invitations.length >= 0
+    ? tabs.reduce(
+        (acc, tab) => {
+          const count = getFilterCount(tab.id);
+          console.log(`Tab ${tab.id} has ${count} items`);
+          acc[tab.id] = count;
+          return acc;
+        },
+        {} as Record<string, number>
+      )
+    : {};
 
 $: console.log('TabFilter counts:', counts, 'invitations length:', invitations.length);
 

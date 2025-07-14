@@ -8,7 +8,7 @@ export default defineConfig({
   integrations: [
     svelte(),
   ],
-  output: 'static',
+  output: process.env.NODE_ENV === 'development' ? 'server' : 'static',
   site: 'https://flows.thepia.net',
   trailingSlash: 'ignore',
   build: {
