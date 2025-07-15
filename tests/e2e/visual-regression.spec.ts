@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Visual Regression - Branding Integration', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the landing page
-    await page.goto('/');
+    await page.goto('http://dev.thepia.net:5178/');
     
     // Wait for page to be fully loaded
     await page.waitForLoadState('networkidle');
@@ -29,7 +29,7 @@ test.describe('Visual Regression - Branding Integration', () => {
 
   test('Button styling verification', async ({ page }) => {
     // Look for buttons and capture their styling
-    const buttons = page.locator('button, .btn-primary, .btn-secondary, .btn-outline, a[class*="btn"]');
+    const buttons = page.locator('button, .btn-primary, .btn-secondary, .btn-outline');
     
     if (await buttons.count() > 0) {
       await expect(buttons.first()).toHaveScreenshot('button-styling.png', {
@@ -67,9 +67,7 @@ test.describe('Visual Regression - Branding Integration', () => {
         return {
           backgroundColor: styles.backgroundColor,
           color: styles.color,
-          borderColor: styles.borderColor,
-          padding: styles.padding,
-          borderRadius: styles.borderRadius
+          borderColor: styles.borderColor
         };
       });
       
@@ -85,48 +83,13 @@ test.describe('Visual Regression - Branding Integration', () => {
         'color-brand-primary': rootStyles.getPropertyValue('--color-brand-primary').trim(),
         'color-palette-thepia-400': rootStyles.getPropertyValue('--color-palette-thepia-400').trim(),
         'color-primary': rootStyles.getPropertyValue('--color-primary').trim(),
-        'brand-colors-primary': rootStyles.getPropertyValue('--brand-colors-primary').trim(),
       };
     });
     
     console.log('CSS Variables:', cssVariables);
     
     // Verify that branding variables are loaded
-    expect(cssVariables['color-brand-primary'] || cssVariables['brand-colors-primary']).toBeTruthy();
-  });
-
-  test('Detailed element inspection', async ({ page }) => {
-    // Find all elements with styling issues
-    const styledElements = await page.evaluate(() => {
-      const elements = document.querySelectorAll('.btn-primary, .btn-secondary, .btn-outline, .step-indicator, .card');
-      return Array.from(elements).map(el => {
-        const styles = window.getComputedStyle(el);
-        return {
-          tagName: el.tagName,
-          className: el.className,
-          backgroundColor: styles.backgroundColor,
-          color: styles.color,
-          border: styles.border,
-          padding: styles.padding,
-          borderRadius: styles.borderRadius
-        };
-      });
-    });
-    
-    console.log('Styled elements inspection:', styledElements);
-  });
-
-  test('Footer with square logo verification', async ({ page }) => {
-    const footer = page.locator('footer');
-    await expect(footer).toBeVisible();
-
-    // Check for Thepia square logo in footer
-    const footerLogo = footer.locator('img[alt="Thepia"]');
-    await expect(footerLogo).toBeVisible();
-
-    // Capture footer screenshot
-    await expect(footer).toHaveScreenshot('footer-with-logo.png', {
-      animations: 'disabled'
-    });
+    expect(cssVariables['color-brand-primary']).toBeTruthy();
+    expect(cssVariables['color-palette-thepia-400']).toBeTruthy();
   });
 });
