@@ -1,6 +1,7 @@
 <script>
 import { isAdmin, loading, signOut, user } from '../../stores/auth.ts';
 import InvitationsViewSimple from './InvitationsViewSimple.svelte';
+import TestInvitationFlow from './TestInvitationFlow.svelte';
 import LoginForm from './LoginForm.svelte';
 
 let _showUserMenu = false;
@@ -93,8 +94,16 @@ function handleSignOut() {
     </nav>
     
     <!-- Main Content -->
-    <main>
-      <InvitationsViewSimple />
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <!-- Test Invitation Flow Section -->
+      <section>
+        <TestInvitationFlow />
+      </section>
+      
+      <!-- Invitations Management Section -->
+      <section>
+        <InvitationsViewSimple />
+      </section>
     </main>
   </div>
 {/if}

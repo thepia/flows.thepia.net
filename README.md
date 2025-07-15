@@ -9,6 +9,7 @@ This repository contains the source code for the public demo website at [flows.t
 - **Public landing page** for the official Thepia Flows demo
 - **Live demonstration** of flows-db with real client data
 - **Authentication showcase** using flows-auth with passkey login
+- **Admin interface** for invitation management and testing workflows
 - **Component development** environment for eventual migration to flows-admin package
 
 ## Architecture
@@ -73,6 +74,10 @@ pnpm test                     # Run unit tests
 pnpm test:watch               # Run tests in watch mode
 pnpm test:coverage            # Run tests with coverage
 pnpm exec playwright test     # Run E2E tests
+
+# Admin Interface Testing
+# Navigate to /admin for invitation flow testing
+# See docs/admin/test-invitation-flow.md for details
 
 # Demo Operations
 pnpm demo:setup               # Initialize demo environment

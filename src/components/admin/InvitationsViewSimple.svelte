@@ -12,6 +12,7 @@ let error: string | null = null;
 let newInvitationEmail = '';
 let creating = false;
 let activeFilter = 'unresolved';
+let refreshing = false;
 
 // Filter tabs configuration
 const filterTabs = [
@@ -84,9 +85,13 @@ function getFilterCount(filterId: string) {
   }).length;
 }
 
-async function loadInvitations() {
+async function loadInvitations(isRefresh = false) {
   try {
-    loading = true;
+    if (isRefresh) {
+      refreshing = true;
+    } else {
+      loading = true;
+    }
     error = null;
 
     const { data, error: fetchError } = await supabase
@@ -113,6 +118,7 @@ async function loadInvitations() {
     });
   } finally {
     loading = false;
+    refreshing = false;
   }
 }
 
@@ -197,6 +203,10 @@ function decodeInvitationData(invitation: any) {
 
 function handleFilterChange(event: CustomEvent<{ filterId: string }>) {
   activeFilter = event.detail.filterId;
+}
+
+function handleRefresh() {
+  loadInvitations(true);
 }
 
 async function _handleApprove(event: CustomEvent<{ invitation: any }>) {
@@ -575,7 +585,9 @@ async function handleEmailSent(
     {activeFilter}
     {getFilterCount}
     {invitations}
+    {refreshing}
     on:filterChange={handleFilterChange}
+    on:refresh={handleRefresh}
   />
 
   <!-- Invitations List -->

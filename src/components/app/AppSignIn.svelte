@@ -316,9 +316,11 @@ async function handleRegistrationSubmit() {
     // Register the user with flows-auth (this will trigger passkey creation)
     const result = await authStore.registerUser({
       email: registrationData.email,
+      firstName: registrationData.firstName,
+      lastName: registrationData.lastName,
       acceptedTerms: registrationData.acceptedTerms,
       acceptedPrivacy: registrationData.acceptedPrivacy,
-      profile: userProfile
+      invitationToken: invitationToken || undefined // Pass invitation token for email verification
     });
     
     if (result.step === 'success' && result.user) {
