@@ -15,6 +15,31 @@ let currentUser = null;
 let isAuthenticated = false;
 let invitationToken = null;
 
+// Detect available API server (local first, then production)
+async function detectApiServer(): Promise<string> {
+  // Check for localhost development
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'https://dev.thepia.com:8443';
+  }
+  
+  // Try local development server first
+  try {
+    const localResponse = await fetch('https://dev.thepia.com:8443/health', {
+      signal: AbortSignal.timeout(3000)
+    });
+    if (localResponse.ok) {
+      console.log('🔧 Using local API server: https://dev.thepia.com:8443');
+      return 'https://dev.thepia.com:8443';
+    }
+  } catch (error) {
+    console.log('ℹ️ Local API server not available, using production');
+  }
+  
+  // Fallback to production
+  console.log('🌐 Using production API server: https://api.thepia.com');
+  return 'https://api.thepia.com';
+}
+
 // Parse URL parameters for invitation token
 onMount(async () => {
   if (!browser) return;
@@ -29,8 +54,12 @@ onMount(async () => {
     // Dynamically import flows-auth to avoid SSR issues
     const { createAuthStore } = await import('@thepia/flows-auth');
 
+    // Detect available API server (local first, then production)
+    const apiBaseUrl = await detectApiServer();
+    console.log('🔧 Demo using API server:', apiBaseUrl);
+
     authStore = createAuthStore({
-      apiBaseUrl: 'https://api.thepia.com', // Use production API for demo
+      apiBaseUrl: apiBaseUrl,
       clientId: 'thepia-flows-demo', // Required standard prop
       domain: 'thepia.net',
       enablePasskeys: true,

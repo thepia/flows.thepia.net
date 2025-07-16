@@ -34,6 +34,31 @@ let registrationData = {
   acceptedPrivacy: false
 };
 
+// Detect available API server (local first, then production)
+async function detectApiServer(): Promise<string> {
+  // Check for localhost development
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'https://dev.thepia.com:8443';
+  }
+  
+  // Try local development server first
+  try {
+    const localResponse = await fetch('https://dev.thepia.com:8443/health', {
+      signal: AbortSignal.timeout(3000)
+    });
+    if (localResponse.ok) {
+      console.log('🔧 Using local API server: https://dev.thepia.com:8443');
+      return 'https://dev.thepia.com:8443';
+    }
+  } catch (error) {
+    console.log('ℹ️ Local API server not available, using production');
+  }
+  
+  // Fallback to production
+  console.log('🌐 Using production API server: https://api.thepia.com');
+  return 'https://api.thepia.com';
+}
+
 onMount(async () => {
   if (!browser) return;
 
@@ -69,8 +94,12 @@ onMount(async () => {
     const { createAuthStore, SignInForm: AuthForm } = await import('@thepia/flows-auth');
     SignInForm = AuthForm;
 
+    // Detect available API server (local first, then production)
+    const apiBaseUrl = await detectApiServer();
+    console.log('🔧 Using API server:', apiBaseUrl);
+
     authStore = createAuthStore({
-      apiBaseUrl: 'https://api.thepia.com',
+      apiBaseUrl: apiBaseUrl,
       clientId: 'thepia-flows-app',
       domain: 'thepia.net',
       enablePasskeys: true,
@@ -116,8 +145,42 @@ async function checkTokenAndUserStatus() {
     const userCheck = await authStore.checkUser(tokenData.email);
     
     if (userCheck.exists) {
-      // User exists - redirect to sign-in instead of registration
-      console.log('User already exists, showing sign-in form');
+      // User exists - check if they have a passkey
+      console.log('User exists, checking passkey status:', userCheck);
+      
+      if (!userCheck.hasPasskey && invitationToken && tokenValid) {
+        // User exists but no passkey + valid token = resume passkey registration
+        console.log('User exists but no passkey, resuming passkey registration with token');
+        
+        // Verify token hash for security (if available)
+        if (userCheck.invitationTokenHash) {
+          const currentTokenHash = await hashInvitationToken(invitationToken);
+          if (currentTokenHash !== userCheck.invitationTokenHash) {
+            console.warn('🔒 Token hash mismatch - token may not be valid for this user');
+            authError = 'Invalid invitation token for this user. Please use the original invitation link.';
+            showRegistrationForm = false;
+            return;
+          }
+          console.log('✅ Token hash verified - resuming passkey registration');
+        } else {
+          console.warn('⚠️ No stored token hash found - allowing registration without token verification');
+        }
+        
+        // Pre-fill registration data for passkey completion
+        registrationData.email = tokenData.email || '';
+        registrationData.firstName = tokenData.firstName || tokenData.name?.split(' ')[0] || '';
+        registrationData.lastName = tokenData.lastName || tokenData.name?.split(' ').slice(1).join(' ') || '';
+        registrationData.company = tokenData.company || tokenData.companyName || '';
+        registrationData.phone = tokenData.phone || '';
+        registrationData.jobTitle = tokenData.jobTitle || 'Hiring Manager';
+        
+        showRegistrationForm = true;
+        authError = null;
+        return;
+      }
+      
+      // User exists and has passkey (or no valid token) - show sign-in
+      console.log('User exists with passkey, showing sign-in form');
       authError = `An account with ${tokenData.email} already exists. Please sign in below.`;
       showRegistrationForm = false;
       return;
@@ -268,6 +331,24 @@ function validateInvitationToken(token, tokenData) {
   } catch (error) {
     console.error('Token validation error:', error);
     return false;
+  }
+}
+
+// Compute SHA-256 hash of invitation token for security verification
+async function hashInvitationToken(token) {
+  if (!token || typeof token !== 'string') {
+    return null;
+  }
+
+  try {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(token);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (error) {
+    console.error('Failed to hash invitation token:', error);
+    return null;
   }
 }
 
@@ -493,8 +574,31 @@ async function handlePasskeySignIn() {
       {:else if showRegistrationForm && tokenData}
         <!-- Registration Form with Token Data -->
         <div class="registration-container">
-          <h2 class="registration-title">Complete Your Registration</h2>
-          <p class="registration-subtitle">We have some information from your invitation. Please review and complete your profile.</p>
+          <h2 class="registration-title">
+            {#if authStore && tokenData?.email}
+              {#await authStore.checkUser(tokenData.email) then userCheck}
+                {userCheck.exists ? 'Complete Your Passkey Setup' : 'Complete Your Registration'}
+              {:catch}
+                Complete Your Registration
+              {/await}
+            {:else}
+              Complete Your Registration
+            {/if}
+          </h2>
+          <p class="registration-subtitle">
+            {#if authStore && tokenData?.email}
+              {#await authStore.checkUser(tokenData.email) then userCheck}
+                {userCheck.exists ? 
+                  'Your account exists but needs a passkey for secure access. Please create your passkey below.' : 
+                  'We have some information from your invitation. Please review and complete your profile.'
+                }
+              {:catch}
+                We have some information from your invitation. Please review and complete your profile.
+              {/await}
+            {:else}
+              We have some information from your invitation. Please review and complete your profile.
+            {/if}
+          </p>
           
           {#if tokenData.expires && tokenData.expires < new Date()}
             <div class="warning-banner">

@@ -1,76 +1,147 @@
 <script>
 import { onMount } from 'svelte';
+import { thepiaColors } from '@thepia/branding';
 
 // Browser detection for Astro environment
 const browser = typeof window !== 'undefined';
 
 let authStore = null;
-let _isLoading = true;
-let _error = null;
-const _isAuthenticated = false;
-const _user = null;
+let isLoading = true;
+let authError = null;
+let isAuthenticated = false;
+let currentUser = null;
+let isSigningIn = false;
+let signinEmail = '';
+
+// Detect available API server (local first, then production)
+async function detectApiServer() {
+  // Check for localhost development
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'https://dev.thepia.com:8443';
+  }
+  
+  // Try local development server first
+  try {
+    const localResponse = await fetch('https://dev.thepia.com:8443/health', {
+      signal: AbortSignal.timeout(3000)
+    });
+    if (localResponse.ok) {
+      console.log('🔧 Using local API server: https://dev.thepia.com:8443');
+      return 'https://dev.thepia.com:8443';
+    }
+  } catch (error) {
+    console.log('ℹ️ Local API server not available, using production');
+  }
+  
+  // Fallback to production
+  console.log('🌐 Using production API server: https://api.thepia.com');
+  return 'https://api.thepia.com';
+}
 
 onMount(async () => {
   if (!browser) return;
 
   try {
-    // Mock auth implementation for initial development
-    // TODO: Replace with actual flows-auth integration
+    // Dynamically import flows-auth to avoid SSR issues
+    const { createAuthStore } = await import('@thepia/flows-auth');
 
-    // Simulate loading delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Detect available API server (local first, then production)
+    const apiBaseUrl = await detectApiServer();
+    console.log('🔧 AuthSection using API server:', apiBaseUrl);
 
-    // Mock auth store
-    authStore = {
-      subscribe: (callback) => {
-        callback({
-          isAuthenticated: false,
-          user: null,
-          isLoading: false,
-          error: null,
-        });
-        return () => {}; // unsubscribe function
+    authStore = createAuthStore({
+      apiBaseUrl: apiBaseUrl,
+      clientId: 'thepia-flows-landing',
+      domain: 'thepia.net',
+      enablePasskeys: true,
+      enableMagicLinks: true,
+      enableSocialLogin: false,
+      enablePasswordLogin: false,
+      branding: {
+        companyName: 'Thepia Flows',
+        logoUrl: '/favicon.svg',
+        primaryColor: thepiaColors.primary,
       },
-      initialize: async () => {
-        _isLoading = false;
-      },
-      signIn: () => {
-        // Mock sign in - show alert for now
-        alert('Mock sign in - flows-auth integration coming soon!');
-      },
-    };
+    });
 
-    // Initialize mock auth store
-    await authStore.initialize();
+    // Subscribe to auth state changes
+    authStore.subscribe(($auth) => {
+      currentUser = $auth.user;
+      isAuthenticated = $auth.isAuthenticated;
+      
+      // Redirect to app if authenticated
+      if (isAuthenticated && currentUser) {
+        window.location.href = '/app';
+      }
+    });
+
+    isLoading = false;
   } catch (err) {
     console.error('Failed to load auth:', err);
-    _error = 'Failed to load authentication system';
-    _isLoading = false;
+    authError = 'Failed to load authentication system';
+    isLoading = false;
   }
 });
 
-function _handleSignIn() {
-  if (authStore) {
-    authStore.signIn();
+// Handle passkey sign-in
+async function handlePasskeySignIn() {
+  if (!signinEmail.trim()) {
+    authError = 'Please enter your email address';
+    return;
   }
+
+  isSigningIn = true;
+  authError = null;
+
+  try {
+    // Try to sign in with passkey using flows-auth
+    const result = await authStore.signInWithPasskey(signinEmail);
+    
+    if (result.step === 'success' && result.user) {
+      // Sign-in successful - will auto-redirect via auth state subscription
+      console.log('Passkey sign-in successful:', result.user);
+    }
+  } catch (error) {
+    console.error('Passkey sign-in failed:', error);
+    
+    // Handle specific error cases
+    if (error.message?.includes('NotAllowedError')) {
+      authError = 'Passkey authentication was cancelled. Please try again.';
+    } else if (error.message?.includes('NotSupportedError')) {
+      authError = 'Passkey authentication is not supported on this device.';
+    } else if (error.message?.includes('InvalidStateError')) {
+      authError = 'No passkey found for this email address.';
+    } else if (error.message?.includes('not found') || error.message?.includes('404')) {
+      authError = 'No account found with this email address.';
+    } else {
+      authError = error.message || 'Sign-in failed. Please try again.';
+    }
+  } finally {
+    isSigningIn = false;
+  }
+}
+
+// Clear error when user starts typing
+function clearError() {
+  authError = null;
 }
 </script>
 
 <div class="auth-section">
-  {#if _isLoading}
+  {#if isLoading}
     <!-- Loading State -->
     <div class="flex items-center justify-center p-8">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       <span class="ml-3 text-gray-600">Loading authentication...</span>
     </div>
-  {:else if _error}
+  {:else if authError}
     <!-- Error State -->
     <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
       <svg class="w-12 h-12 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
       </svg>
       <h3 class="text-lg font-medium text-red-800 mb-2">Authentication Error</h3>
-      <p class="text-red-600 mb-4">{_error}</p>
+      <p class="text-red-600 mb-4">{authError}</p>
       <button 
         on:click={() => window.location.reload()} 
         class="btn-secondary"
@@ -78,7 +149,7 @@ function _handleSignIn() {
         Try Again
       </button>
     </div>
-  {:else if _isAuthenticated}
+  {:else if isAuthenticated}
     <!-- Authenticated State -->
     <div class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
       <svg class="w-12 h-12 text-green-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,16 +174,37 @@ function _handleSignIn() {
         </p>
       </div>
 
+      <!-- Email Input -->
+      <div class="mb-4">
+        <label for="signin-email" class="block text-sm font-medium text-gray-700 mb-2">
+          Email Address
+        </label>
+        <input
+          id="signin-email"
+          type="email"
+          bind:value={signinEmail}
+          on:input={clearError}
+          placeholder="Enter your email"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          disabled={isSigningIn}
+        />
+      </div>
+
       <!-- Sign In Button -->
       <button 
-        on:click={handleSignIn}
+        on:click={handlePasskeySignIn}
         class="w-full btn-primary flex items-center justify-center"
-        disabled={!authStore}
+        disabled={!authStore || isSigningIn || !signinEmail.trim()}
       >
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-        </svg>
-        Sign In with Passkey
+        {#if isSigningIn}
+          <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+          Signing in...
+        {:else}
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+          </svg>
+          Sign In with Passkey
+        {/if}
       </button>
 
       <!-- Info Section -->
