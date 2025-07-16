@@ -313,8 +313,8 @@ async function handleRegistrationSubmit() {
       }
     };
     
-    // Register the user with flows-auth (this will trigger passkey creation)
-    const result = await authStore.registerUser({
+    // Create account with passkey using the new comprehensive flow
+    const result = await authStore.createAccount({
       email: registrationData.email,
       firstName: registrationData.firstName,
       lastName: registrationData.lastName,

@@ -5,6 +5,11 @@ import { checkEmailService, sendInvitationEmail } from '../../lib/utils/emailSen
 export let invitation: any;
 export let inviteData: any;
 
+// Detect environment and build appropriate URL
+const isDev = import.meta.env.DEV;
+const baseUrl = isDev ? 'https://dev.thepia.net:5176' : 'https://flows.thepia.net';
+const demoPath = isDev ? '/demo' : '/app';
+
 const dispatch = createEventDispatcher<{
   approve: { invitation: any };
   reject: { invitation: any };
@@ -152,6 +157,26 @@ function getNotificationStatusBadgeClass(notificationStatus: string) {
           <div>Role: {inviteData.role}</div>
         {/if}
         <div>Code: <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">{inviteData.invitation_code}</code></div>
+        {#if invitation.jwt_token}
+          <div class="flex items-center gap-2">
+            <span>Link:</span>
+            <a 
+              href="{baseUrl}{demoPath}?token={invitation.jwt_token}" 
+              target="_blank"
+              class="text-blue-600 dark:text-blue-400 hover:underline text-xs font-mono break-all"
+              title="Click to open invitation link"
+            >
+              {baseUrl}{demoPath}?token={invitation.jwt_token}
+            </a>
+            <button
+              on:click={() => navigator.clipboard.writeText(`${baseUrl}${demoPath}?token=${invitation.jwt_token}`)}
+              class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              title="Copy link to clipboard"
+            >
+              📋
+            </button>
+          </div>
+        {/if}
         {#if inviteData.request_id}
           <div>Request ID: <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">{inviteData.request_id}</code></div>
         {/if}

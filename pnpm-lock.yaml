@@ -24,11 +24,11 @@ importers:
         specifier: ^4.1.10
         version: 4.1.11(vite@5.4.19(@types/node@24.0.13)(lightningcss@1.30.1))
       '@thepia/branding':
-        specifier: file:../branding
-        version: file:../branding(typescript@5.8.3)
+        specifier: 1.2.1
+        version: 1.2.1(typescript@5.8.3)
       '@thepia/flows-auth':
-        specifier: file:../flows-auth
-        version: file:../flows-auth(svelte@4.2.20)
+        specifier: ^1.0.1
+        version: 1.0.1(svelte@4.2.20)
       astro:
         specifier: ^4.16.18
         version: 4.16.18(@types/node@24.0.13)(lightningcss@1.30.1)(rollup@4.44.1)(typescript@5.8.3)
@@ -901,6 +901,9 @@ packages:
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
 
+  '@simplewebauthn/browser@13.1.2':
+    resolution: {integrity: sha512-aZnW0KawAM83fSBUgglP5WofbrLbLyr7CoPqYr66Eppm7zO86YX6rrCjRB3hQKPrL7ATvY4FVXlykZ6w6FwYYw==}
+
   '@smithy/abort-controller@4.0.4':
     resolution: {integrity: sha512-gJnEjZMvigPDQWHrW3oPrFhQtkrgqBkyjj3pCIdF3A5M6vsZODG93KNlfJprv6bp4245bdT32fsHK4kkH3KYDA==}
     engines: {node: '>=18.0.0'}
@@ -1221,14 +1224,14 @@ packages:
     peerDependencies:
       svelte: ^3 || ^4 || ^5
 
-  '@thepia/branding@file:../branding':
-    resolution: {directory: ../branding, type: directory}
+  '@thepia/branding@1.2.1':
+    resolution: {integrity: sha512-pUxgRwfedeGcwOB5AuaoP4cFefnahoDQ6TTPuB9/2EfuwIrFPH7T3x6iGKFExnDGrHeBZD281Y70j6JtY0YmHQ==, tarball: https://npm.pkg.github.com/download/@thepia/branding/1.2.1/321b00fcbc7e806b9132326bcdb4687738148918}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       typescript: ^5.0.0
 
-  '@thepia/flows-auth@file:../flows-auth':
-    resolution: {directory: ../flows-auth, type: directory}
+  '@thepia/flows-auth@1.0.1':
+    resolution: {integrity: sha512-ECmwoi6jg3/J8n4w2464SjgnyP2haEAmT73smxsetNBNWLfjLcGakg+szanE9hXPibZt7MNi4ui1nFp1IUmZEw==, tarball: https://npm.pkg.github.com/download/@thepia/flows-auth/1.0.1/a0f21b77c14592a47871fce926a1973092d24f52}
     engines: {node: '>=18.0.0', pnpm: '>=8.0.0'}
     peerDependencies:
       svelte: ^4.0.0 || ^5.0.0
@@ -4503,6 +4506,8 @@ snapshots:
 
   '@shikijs/vscode-textmate@10.0.2': {}
 
+  '@simplewebauthn/browser@13.1.2': {}
+
   '@smithy/abort-controller@4.0.4':
     dependencies:
       '@smithy/types': 4.3.1
@@ -4948,7 +4953,7 @@ snapshots:
       '@testing-library/dom': 9.3.4
       svelte: 4.2.20
 
-  '@thepia/branding@file:../branding(typescript@5.8.3)':
+  '@thepia/branding@1.2.1(typescript@5.8.3)':
     dependencies:
       chokidar: 3.6.0
       fast-glob: 3.3.3
@@ -4956,8 +4961,9 @@ snapshots:
       kleur: 4.1.5
       typescript: 5.8.3
 
-  '@thepia/flows-auth@file:../flows-auth(svelte@4.2.20)':
+  '@thepia/flows-auth@1.0.1(svelte@4.2.20)':
     dependencies:
+      '@simplewebauthn/browser': 13.1.2
       base64url: 3.0.1
       svelte: 4.2.20
 
