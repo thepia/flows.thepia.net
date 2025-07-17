@@ -1,8 +1,8 @@
 <script>
 import { isAdmin, loading, signOut, user } from '../../stores/auth.ts';
 import InvitationsViewSimple from './InvitationsViewSimple.svelte';
-import TestInvitationFlow from './TestInvitationFlow.svelte';
 import LoginForm from './LoginForm.svelte';
+import TestInvitationFlow from './TestInvitationFlow.svelte';
 
 let _showUserMenu = false;
 

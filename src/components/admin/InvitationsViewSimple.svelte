@@ -335,7 +335,7 @@ async function _handleUpdateStatus(event: CustomEvent<{ id: string; status: stri
 function generateInvitationAccessUrl(invitation) {
   const baseUrl = window.location.origin;
   const accessToken = invitation.jwt_token || invitation.invitation_code;
-  return `${baseUrl}/demo?token=${encodeURIComponent(accessToken)}`;
+  return `${baseUrl}/app?token=${encodeURIComponent(accessToken)}`;
 }
 
 // User-friendly error message transformation

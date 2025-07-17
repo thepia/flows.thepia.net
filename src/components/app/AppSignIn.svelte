@@ -1,6 +1,8 @@
 <script lang="ts">
-import { onMount } from 'svelte';
 import { thepiaColors } from '@thepia/branding';
+import { onMount } from 'svelte';
+import { cleanInvitationUrl } from '../../utils/invitationHandler';
+import DemoApp from '../../demo/DemoApp.svelte';
 import LoadingSpinner from '../../demo/LoadingSpinner.svelte';
 
 // Browser detection for Astro
@@ -11,8 +13,6 @@ let SignInForm = null;
 let authLoaded = false;
 let determiningMode = false;
 let authError = null;
-let currentUser = null;
-let isAuthenticated = false;
 let showingDemo = false;
 let invitationToken = null;
 let tokenData = null;
@@ -31,7 +31,7 @@ let registrationData = {
   phone: '',
   jobTitle: '',
   acceptedTerms: false,
-  acceptedPrivacy: false
+  acceptedPrivacy: false,
 };
 
 // Detect available API server (local first, then production)
@@ -40,11 +40,11 @@ async function detectApiServer(): Promise<string> {
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
     return 'https://dev.thepia.com:8443';
   }
-  
+
   // Try local development server first
   try {
     const localResponse = await fetch('https://dev.thepia.com:8443/health', {
-      signal: AbortSignal.timeout(3000)
+      signal: AbortSignal.timeout(3000),
     });
     if (localResponse.ok) {
       console.log('🔧 Using local API server: https://dev.thepia.com:8443');
@@ -53,7 +53,7 @@ async function detectApiServer(): Promise<string> {
   } catch (error) {
     console.log('ℹ️ Local API server not available, using production');
   }
-  
+
   // Fallback to production
   console.log('🌐 Using production API server: https://api.thepia.com');
   return 'https://api.thepia.com';
@@ -65,22 +65,23 @@ onMount(async () => {
   // Check for invitation token in URL
   const urlParams = new URLSearchParams(window.location.search);
   invitationToken = urlParams.get('token');
-  
+
   if (invitationToken) {
     try {
       // First, decode the token
       tokenData = decodeInvitationToken(invitationToken);
       console.log('Invitation token decoded:', tokenData);
-      
+
       // Validate the token signature and expiration
       tokenValid = validateInvitationToken(invitationToken, tokenData);
       console.log('Token validation result:', tokenValid);
-      
+
       if (!tokenValid) {
-        authError = 'Invalid or expired invitation token. Please contact support for a new invitation.';
+        authError =
+          'Invalid or expired invitation token. Please contact support for a new invitation.';
         return;
       }
-      
+
       // We'll check if user exists after auth store is initialized
     } catch (error) {
       console.error('Failed to decode invitation token:', error);
@@ -91,7 +92,20 @@ onMount(async () => {
 
   try {
     // Dynamically import flows-auth to avoid SSR issues
-    const { createAuthStore, SignInForm: AuthForm } = await import('@thepia/flows-auth');
+    const flowsAuthModule = await import('@thepia/flows-auth');
+    console.log('🔍 Available flows-auth exports:', Object.keys(flowsAuthModule));
+    
+    const { 
+      createAuthStore, 
+      SignInForm: AuthForm,
+      isAuthenticatedFromSession,
+      getCurrentUserFromSession 
+    } = flowsAuthModule;
+    
+    console.log('🔍 Session functions loaded:', {
+      isAuthenticatedFromSession: typeof isAuthenticatedFromSession,
+      getCurrentUserFromSession: typeof getCurrentUserFromSession
+    });
     SignInForm = AuthForm;
 
     // Detect available API server (local first, then production)
@@ -113,21 +127,72 @@ onMount(async () => {
       },
     });
 
-    // Subscribe to auth state changes
-    authStore.subscribe(($auth) => {
-      currentUser = $auth.user;
-      isAuthenticated = $auth.isAuthenticated;
+    // Listen for sessionUpdate events (proper thepia.com pattern)
+    window.addEventListener('sessionUpdate', (event) => {
+      const isAuthenticated = isAuthenticatedFromSession();
+      const currentUser = getCurrentUserFromSession();
       
-      // Redirect to app if authenticated
+      console.log('🔍 Session updated:', {
+        isAuthenticated,
+        hasUser: !!currentUser,
+        sessionData: event.detail,
+        currentShowingDemo: showingDemo
+      });
+      
+      // When user is authenticated via WebAuthn, show the app
       if (isAuthenticated && currentUser) {
-        window.location.href = '/app';
+        // Clean up invitation URL if it was an invitation flow
+        if (invitationToken) {
+          cleanInvitationUrl();
+          console.log('🔗 Invitation URL cleaned up after WebAuthn authentication');
+        }
+        
+        // Show the authenticated app content
+        showingDemo = true;
+        console.log('🎯 WebAuthn authenticated - showing app content, showingDemo now:', showingDemo);
+      } else {
+        // User is not authenticated, hide demo content
+        if (showingDemo) {
+          showingDemo = false;
+          console.log('🔍 User not authenticated, hiding demo content');
+        }
       }
+    });
+    
+    // Also subscribe to auth store for backward compatibility and additional state
+    authStore.subscribe(($auth) => {
+      console.log('🔍 Auth store state changed:', {
+        storeState: $auth.state,
+        storeUser: !!$auth.user,
+        sessionAuthenticated: isAuthenticatedFromSession(),
+        sessionUser: !!getCurrentUserFromSession()
+      });
     });
 
     authLoaded = true;
+
+    // Check for existing session on page load
+    const existingAuth = isAuthenticatedFromSession();
+    const existingUser = getCurrentUserFromSession();
     
-    // If we have a valid token, now check if the user exists
-    if (invitationToken && tokenValid && tokenData) {
+    console.log('🔍 Initial session check:', {
+      isAuthenticated: existingAuth,
+      hasUser: !!existingUser,
+      invitationToken: !!invitationToken
+    });
+    
+    if (existingAuth && existingUser) {
+      // User is already authenticated, show the app immediately
+      showingDemo = true;
+      console.log('🎯 User already authenticated - showing app immediately');
+      
+      // Clean up invitation URL if present
+      if (invitationToken) {
+        cleanInvitationUrl();
+        console.log('🔗 Invitation URL cleaned up (user already authenticated)');
+      }
+    } else if (invitationToken && tokenValid && tokenData) {
+      // No existing session but have invitation token
       determiningMode = true;
       await checkTokenAndUserStatus();
       determiningMode = false;
@@ -143,63 +208,116 @@ async function checkTokenAndUserStatus() {
   try {
     // Check if user already exists
     const userCheck = await authStore.checkUser(tokenData.email);
-    
+
     if (userCheck.exists) {
       // User exists - check if they have a passkey
       console.log('User exists, checking passkey status:', userCheck);
+      console.log('🔍 DEBUG: userCheck properties:', {
+        keys: Object.keys(userCheck),
+        hasPasskey: userCheck.hasPasskey,
+        hasWebAuthn: userCheck.hasWebAuthn,
+        invitationTokenHash: userCheck.invitationTokenHash,
+        invitationTokenHashExists: !!userCheck.invitationTokenHash
+      });
       
-      if (!userCheck.hasPasskey && invitationToken && tokenValid) {
+      // Send detailed user check data to error reports for debugging
+      if (window.ErrorReporter) {
+        window.ErrorReporter.reportInfo('User check result', {
+          email: tokenData.email,
+          userCheck: userCheck,
+          expectedProperties: ['exists', 'hasPasskey', 'hasWebAuthn', 'invitationTokenHash'],
+          actualProperties: Object.keys(userCheck)
+        });
+      }
+
+      // Check for passkey using both possible property names (API inconsistency)
+      const hasPasskey = userCheck.hasPasskey || userCheck.hasWebAuthn;
+      
+      if (!hasPasskey && invitationToken && tokenValid) {
         // User exists but no passkey + valid token = resume passkey registration
         console.log('User exists but no passkey, resuming passkey registration with token');
-        
+
         // Verify token hash for security (if available)
         if (userCheck.invitationTokenHash) {
           const currentTokenHash = await hashInvitationToken(invitationToken);
+          
+          // Send hash comparison data to error reports
+          if (window.ErrorReporter) {
+            window.ErrorReporter.reportInfo('Token hash verification', {
+              email: tokenData.email,
+              hasStoredHash: !!userCheck.invitationTokenHash,
+              storedHashPreview: userCheck.invitationTokenHash?.substring(0, 8) + '...',
+              currentHashPreview: currentTokenHash?.substring(0, 8) + '...',
+              hashesMatch: currentTokenHash === userCheck.invitationTokenHash
+            });
+          }
+          
           if (currentTokenHash !== userCheck.invitationTokenHash) {
             console.warn('🔒 Token hash mismatch - token may not be valid for this user');
-            authError = 'Invalid invitation token for this user. Please use the original invitation link.';
+            authError =
+              'Invalid invitation token for this user. Please use the original invitation link.';
             showRegistrationForm = false;
             return;
           }
           console.log('✅ Token hash verified - resuming passkey registration');
         } else {
-          console.warn('⚠️ No stored token hash found - allowing registration without token verification');
+          console.warn(
+            '⚠️ No stored token hash found - allowing registration without token verification'
+          );
+          
+          // Send missing hash data to error reports
+          if (window.ErrorReporter) {
+            window.ErrorReporter.reportWarning('Missing invitation token hash', {
+              email: tokenData.email,
+              userCheckKeys: Object.keys(userCheck),
+              hasInvitationTokenHash: 'invitationTokenHash' in userCheck,
+              invitationTokenHashValue: userCheck.invitationTokenHash
+            });
+          }
         }
-        
+
         // Pre-fill registration data for passkey completion
         registrationData.email = tokenData.email || '';
         registrationData.firstName = tokenData.firstName || tokenData.name?.split(' ')[0] || '';
-        registrationData.lastName = tokenData.lastName || tokenData.name?.split(' ').slice(1).join(' ') || '';
+        registrationData.lastName =
+          tokenData.lastName || tokenData.name?.split(' ').slice(1).join(' ') || '';
         registrationData.company = tokenData.company || tokenData.companyName || '';
         registrationData.phone = tokenData.phone || '';
         registrationData.jobTitle = tokenData.jobTitle || 'Hiring Manager';
-        
+
         showRegistrationForm = true;
         authError = null;
         return;
       }
+
+      // User exists and has passkey - show sign-in form
+      if (hasPasskey) {
+        console.log('User exists with passkey, showing sign-in form');
+        showRegistrationForm = false;
+        return;
+      }
       
-      // User exists and has passkey (or no valid token) - show sign-in
-      console.log('User exists with passkey, showing sign-in form');
-      authError = `An account with ${tokenData.email} already exists. Please sign in below.`;
+      // User exists but no passkey and no valid token - show error
+      console.log('User exists but no passkey and no valid token');
+      authError = 'Account exists but requires setup completion. Please contact support.';
       showRegistrationForm = false;
       return;
     }
-    
+
     // User doesn't exist and token is valid - show registration form
     console.log('Valid token for new user, showing registration form');
-    
+
     // Pre-fill registration data
     registrationData.email = tokenData.email || '';
     registrationData.firstName = tokenData.firstName || tokenData.name?.split(' ')[0] || '';
-    registrationData.lastName = tokenData.lastName || tokenData.name?.split(' ').slice(1).join(' ') || '';
+    registrationData.lastName =
+      tokenData.lastName || tokenData.name?.split(' ').slice(1).join(' ') || '';
     registrationData.company = tokenData.company || tokenData.companyName || '';
     registrationData.phone = tokenData.phone || '';
     registrationData.jobTitle = tokenData.jobTitle || 'Hiring Manager';
-    
+
     showRegistrationForm = true;
     authError = null; // Clear any previous errors
-    
   } catch (error) {
     console.error('Failed to check user status:', error);
     authError = 'Unable to verify invitation. Please try again or contact support.';
@@ -211,7 +329,7 @@ async function checkTokenAndUserStatus() {
 function handleAuthSuccess(event) {
   const { user } = event.detail;
   console.log('Authentication successful:', user);
-  
+
   // Redirect to main app
   window.location.href = '/app';
 }
@@ -220,10 +338,10 @@ function handleAuthSuccess(event) {
 function handleAuthError(event) {
   const { error } = event.detail;
   console.error('Authentication error:', error);
-  
+
   // Show user-friendly error
   authError = error.message || 'Authentication failed. Please try again.';
-  
+
   // Clear error after 5 seconds
   setTimeout(() => {
     authError = null;
@@ -308,7 +426,7 @@ function validateInvitationToken(token, tokenData) {
     // For production, you would verify the signature here using a public key
     // For now, we'll do basic validation
     const [header, payload, signature] = parts;
-    
+
     // Validate that the signature is not empty (basic check)
     if (!signature || signature.length < 10) {
       console.warn('Invitation token has invalid or missing signature');
@@ -345,7 +463,7 @@ async function hashInvitationToken(token) {
     const data = encoder.encode(token);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   } catch (error) {
     console.error('Failed to hash invitation token:', error);
     return null;
@@ -359,23 +477,22 @@ async function handleRegistrationSubmit() {
     authError = 'Please fill in all required fields';
     return;
   }
-  
+
   if (!registrationData.acceptedTerms || !registrationData.acceptedPrivacy) {
     authError = 'You must accept the Terms of Service and Privacy Policy';
     return;
   }
-  
+
   // Validate that email matches token (security check)
   if (tokenData.email && tokenData.email.toLowerCase() !== registrationData.email.toLowerCase()) {
     authError = 'Email address must match the invitation token.';
     return;
   }
-  
+
   isSubmitting = true;
   authError = null;
-  
+
   try {
-    
     // Create user profile with token metadata
     const userProfile = {
       email: registrationData.email,
@@ -390,10 +507,10 @@ async function handleRegistrationSubmit() {
         invitation_data: tokenData,
         registered_at: new Date().toISOString(),
         source: 'invitation_link',
-        token_validated: true
-      }
+        token_validated: true,
+      },
     };
-    
+
     // Create account with passkey using the new comprehensive flow
     const result = await authStore.createAccount({
       email: registrationData.email,
@@ -401,24 +518,27 @@ async function handleRegistrationSubmit() {
       lastName: registrationData.lastName,
       acceptedTerms: registrationData.acceptedTerms,
       acceptedPrivacy: registrationData.acceptedPrivacy,
-      invitationToken: invitationToken || undefined // Pass invitation token for email verification
+      invitationToken: invitationToken || undefined, // Pass invitation token for email verification
     });
-    
+
     if (result.step === 'success' && result.user) {
-      // Registration successful - will auto-redirect via auth state subscription
+      // Registration successful - auth store now has the authenticated session
       console.log('Registration successful:', result.user);
+      // The auth store subscription will detect the authenticated state and handle everything
     }
   } catch (error) {
     console.error('Registration failed:', error);
-    
+
     // Handle specific error cases
     if (error.message?.includes('User already exists')) {
       authError = 'An account with this email already exists. Please sign in instead.';
       switchToSignIn();
     } else if (error.message?.includes('NotAllowedError')) {
-      authError = 'Passkey creation was cancelled. Please try again and allow the passkey creation when prompted.';
+      authError =
+        'Passkey creation was cancelled. Please try again and allow the passkey creation when prompted.';
     } else if (error.message?.includes('NotSupportedError')) {
-      authError = 'Passkey authentication is not supported on this device. Please use a device with biometric authentication.';
+      authError =
+        'Passkey authentication is not supported on this device. Please use a device with biometric authentication.';
     } else {
       authError = error.message || 'Registration failed. Please try again.';
     }
@@ -445,8 +565,14 @@ async function handlePasskeySignIn() {
 
   try {
     // Try to sign in with passkey using flows-auth
+    console.log('🔍 DEMO: About to call authStore.signInWithPasskey with:', signinEmail);
+    console.log('🔍 DEMO: authStore type:', typeof authStore);
+    console.log('🔍 DEMO: authStore.signInWithPasskey type:', typeof authStore?.signInWithPasskey);
+    
     const result = await authStore.signInWithPasskey(signinEmail);
     
+    console.log('🔍 DEMO: signInWithPasskey result:', result);
+
     if (result.step === 'success' && result.user) {
       // Sign-in successful - will auto-redirect via auth state subscription
       console.log('Passkey sign-in successful:', result.user);
@@ -454,6 +580,18 @@ async function handlePasskeySignIn() {
   } catch (error) {
     console.error('Passkey sign-in failed:', error);
     
+    // Send detailed error to error reports for debugging
+    if (window.ErrorReporter) {
+      window.ErrorReporter.reportError('WebAuthn sign-in failure', {
+        email: signinEmail,
+        errorCode: error.code,
+        errorMessage: error.message,
+        errorDetails: error,
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+      });
+    }
+
     // Handle specific error cases
     if (error.message?.includes('NotAllowedError')) {
       authError = 'Passkey authentication was cancelled. Please try again.';
@@ -754,15 +892,8 @@ async function handlePasskeySignIn() {
           </div>
         </div>
       {:else if showingDemo}
-        <!-- Demo Mode -->
-        <div class="demo-container">
-          <h2>Demo Mode</h2>
-          <p>Experience Thepia Flows without signing in</p>
-          <button class="demo-back-button" on:click={hideDemo}>
-            ← Back to Sign In
-          </button>
-          <!-- Add demo content here -->
-        </div>
+        <!-- Authenticated Demo App -->
+        <DemoApp />
       {:else}
         <!-- Fallback -->
         <div class="fallback-container">

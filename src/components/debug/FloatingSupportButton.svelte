@@ -1,12 +1,7 @@
 <script>
-import { onMount, onDestroy } from 'svelte';
-import { 
-  Activity, 
-  AlertCircle, 
-  CheckCircle2, 
-  XCircle
-} from 'lucide-svelte';
 import { thepiaColors } from '@thepia/branding';
+import { Activity, AlertCircle, CheckCircle2, XCircle } from 'lucide-svelte';
+import { onDestroy, onMount } from 'svelte';
 
 let showPopover = false;
 let activeTab = 'chat';
@@ -26,10 +21,10 @@ let dbEndpoint = 'Supabase';
 
 $: overallStatus = (() => {
   const statuses = [errorReportingStatus, devServerStatus, apiServerStatus, databaseStatus];
-  
+
   if (statuses.includes('error') || queueSize > 5) return 'error';
   if (statuses.includes('warning') || queueSize > 0) return 'warning';
-  if (statuses.every(s => s === 'connected' || s === 'healthy')) return 'healthy';
+  if (statuses.every((s) => s === 'connected' || s === 'healthy')) return 'healthy';
   return 'checking';
 })();
 
@@ -48,7 +43,7 @@ $: statusConfig = (() => {
 
 async function checkSystemStatus() {
   console.log('🔍 Checking system status...');
-  
+
   try {
     // Check Error Reporting System
     try {
@@ -64,15 +59,15 @@ async function checkSystemStatus() {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2000);
-      
+
       const response = await fetch('/dev/error-reports', {
         method: 'GET',
         headers: { Accept: 'application/json' },
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       // In production, dev endpoint returns 404 - this is expected
       if (response.status === 404) {
         devServerStatus = 'error';
@@ -91,11 +86,12 @@ async function checkSystemStatus() {
 
     // Check API Server
     try {
-      const isDev = window.location.hostname === 'localhost' || 
-                   window.location.hostname.includes('dev.thepia.net');
+      const isDev =
+        window.location.hostname === 'localhost' ||
+        window.location.hostname.includes('dev.thepia.net');
       apiEndpoint = isDev ? 'https://dev.thepia.com:8443' : 'https://api.thepia.com';
       currentEnvironment = isDev ? 'Development' : 'Production';
-      
+
       // For now mark as connected, implement actual health check later
       apiServerStatus = 'connected';
       console.log(`✅ API server (${apiEndpoint}): ${apiServerStatus}`);
@@ -108,7 +104,7 @@ async function checkSystemStatus() {
     try {
       const { supabase } = await import('../../lib/supabase.js');
       const { data, error } = await supabase.from('invitations').select('id').limit(1);
-      
+
       if (error) {
         console.error('❌ Database check failed:', error);
         databaseStatus = 'error';
@@ -135,7 +131,7 @@ async function testErrorReport() {
     const { reportComponentError } = await import('../../lib/config/errorReporting.js');
     await reportComponentError('FloatingStatusButton', 'testError', new Error('Test error'), {
       test: true,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
     alert('Test error sent!');
   } catch (error) {

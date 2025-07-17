@@ -2,10 +2,12 @@ import { defineConfig } from 'astro/config';
 import svelte from '@astrojs/svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { getHttpsConfig, getServerConfig } from './scripts/dev-server.mjs';
+// import ThepiaBrandingPlugin from '@thepia/branding/astro/ThepiaBrandingPlugin.mjs';
 
 // https://astro.build/config
 export default defineConfig({
   integrations: [
+    // ThepiaBrandingPlugin(),
     svelte(),
   ],
   output: process.env.NODE_ENV === 'development' ? 'server' : 'static',

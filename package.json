@@ -5,6 +5,7 @@
   "description": "Public demo website for Thepia Flows with live database integration and passkey authentication",
   "scripts": {
     "dev": "astro dev",
+    "dev:flows": "concurrently \"cd ../flows-auth && pnpm build:watch\" \"pnpm dev\"",
     "build": "astro check && astro build",
     "build:watch": "astro build --watch",
     "preview": "astro preview",
@@ -25,6 +26,9 @@
     "deploy:production": "echo 'Deploying to Bunny CDN...'",
     "setup:https": "./scripts/setup-https.sh",
     "setup:letsencrypt": "./scripts/setup-letsencrypt-dev.sh",
+    "setup:flows-auth-dev": "./scripts/setup-flows-auth-dev.sh",
+    "rebuild:flows-auth": "cd ../flows-auth && pnpm build && cd ../flows.thepia.net && rm -rf node_modules/.vite && rm -rf .astro && rm -rf node_modules/@thepia && pnpm install --force",
+    "force-refresh": "./scripts/force-refresh-flows-auth.sh",
     "install:with-env": "set -a && [ -f .env ] && . ./.env && set +a && pnpm install"
   },
   "dependencies": {
@@ -34,7 +38,7 @@
     "@supabase/supabase-js": "^2.50.5",
     "@tailwindcss/vite": "^4.1.10",
     "@thepia/branding": "1.2.1",
-    "@thepia/flows-auth": "^1.0.1",
+    "@thepia/flows-auth": "file:../flows-auth",
     "astro": "^4.16.18",
     "bits-ui": "^2.8.11",
     "clsx": "^2.1.1",
@@ -55,6 +59,7 @@
     "@vitest/coverage-v8": "^2.1.8",
     "@vitest/ui": "^2.1.8",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^8.2.2",
     "jsdom": "^25.0.1",
     "node-fetch": "^3.3.2",
     "postcss": "^8.5.6",

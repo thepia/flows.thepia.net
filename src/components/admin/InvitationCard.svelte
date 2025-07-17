@@ -8,7 +8,7 @@ export let inviteData: any;
 // Detect environment and build appropriate URL
 const isDev = import.meta.env.DEV;
 const baseUrl = isDev ? 'https://dev.thepia.net:5176' : 'https://flows.thepia.net';
-const demoPath = isDev ? '/demo' : '/app';
+const demoPath = '/app';
 
 const dispatch = createEventDispatcher<{
   approve: { invitation: any };

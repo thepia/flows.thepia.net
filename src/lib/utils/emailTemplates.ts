@@ -77,7 +77,7 @@ export function formatDate(dateString: string | null): string {
 export function generateAccessUrl(jwt_token: string): string {
   const baseUrl =
     typeof window !== 'undefined' ? window.location.origin : 'https://flows.thepia.net';
-  return `${baseUrl}/demo?token=${encodeURIComponent(jwt_token)}`;
+  return `${baseUrl}/app?token=${encodeURIComponent(jwt_token)}`;
 }
 
 // Email template selector

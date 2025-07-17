@@ -2,8 +2,8 @@
 import { onMount } from 'svelte';
 // Browser detection for Astro
 const browser = typeof window !== 'undefined';
-import { reportSupabaseError } from '../lib/config/errorReporting.js';
 import { thepiaColors } from '@thepia/branding';
+import { reportSupabaseError } from '../lib/config/errorReporting.js';
 import DemoAuth from './DemoAuth.svelte';
 import DemoContent from './DemoContent.svelte';
 import LoadingSpinner from './LoadingSpinner.svelte';
@@ -21,11 +21,11 @@ async function detectApiServer(): Promise<string> {
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
     return 'https://dev.thepia.com:8443';
   }
-  
+
   // Try local development server first
   try {
     const localResponse = await fetch('https://dev.thepia.com:8443/health', {
-      signal: AbortSignal.timeout(3000)
+      signal: AbortSignal.timeout(3000),
     });
     if (localResponse.ok) {
       console.log('🔧 Using local API server: https://dev.thepia.com:8443');
@@ -34,7 +34,7 @@ async function detectApiServer(): Promise<string> {
   } catch (error) {
     console.log('ℹ️ Local API server not available, using production');
   }
-  
+
   // Fallback to production
   console.log('🌐 Using production API server: https://api.thepia.com');
   return 'https://api.thepia.com';
@@ -51,43 +51,43 @@ onMount(async () => {
   console.log('Demo app starting up...', { invitationToken: !!invitationToken });
 
   try {
-    // Dynamically import flows-auth to avoid SSR issues
-    const { createAuthStore } = await import('@thepia/flows-auth');
+    // Dynamically import flows-auth session functions
+    const { 
+      isAuthenticatedFromSession,
+      getCurrentUserFromSession,
+      getAccessTokenFromSession 
+    } = await import('@thepia/flows-auth');
 
-    // Detect available API server (local first, then production)
-    const apiBaseUrl = await detectApiServer();
-    console.log('🔧 Demo using API server:', apiBaseUrl);
-
-    authStore = createAuthStore({
-      apiBaseUrl: apiBaseUrl,
-      clientId: 'thepia-flows-demo', // Required standard prop
-      domain: 'thepia.net',
-      enablePasskeys: true,
-      enableMagicLinks: true,
-      enableSocialLogin: false, // Required standard prop
-      enablePasswordLogin: false, // Required standard prop
-      branding: {
-        companyName: 'Thepia Flows',
-        logoUrl: '/favicon.svg',
-        primaryColor: thepiaColors.primary,
-      },
+    // Check authentication from sessionStorage (thepia.com pattern)
+    isAuthenticated = isAuthenticatedFromSession();
+    currentUser = getCurrentUserFromSession();
+    
+    console.log('🔍 DemoApp session check:', {
+      isAuthenticated,
+      hasUser: !!currentUser,
+      userEmail: currentUser?.email
     });
 
-    // Subscribe to auth state changes
-    authStore.subscribe(($auth) => {
-      currentUser = $auth.user;
-      isAuthenticated = $auth.isAuthenticated;
-      console.log('Auth state changed:', { isAuthenticated, user: currentUser });
+    // Listen for session updates
+    window.addEventListener('sessionUpdate', (event) => {
+      isAuthenticated = isAuthenticatedFromSession();
+      currentUser = getCurrentUserFromSession();
+      
+      console.log('🔍 DemoApp session updated:', {
+        isAuthenticated,
+        hasUser: !!currentUser,
+        sessionData: event.detail
+      });
     });
 
     authLoaded = true;
-    console.log('Auth store initialized successfully');
+    console.log('✅ DemoApp auth check complete');
   } catch (error) {
-    console.error('Failed to initialize auth store:', error);
-    authError = error.message || 'Failed to load authentication system';
+    console.error('Failed to check auth session:', error);
+    authError = error.message || 'Failed to load authentication';
 
     await reportSupabaseError('demo', 'auth_init', error, {
-      operation: 'initializeAuthStore',
+      operation: 'checkAuthSession',
       component: 'DemoApp',
       invitationToken: !!invitationToken,
     });

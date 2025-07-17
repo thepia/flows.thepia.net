@@ -30,8 +30,8 @@ const testTemplates = [
       demoDuration: '14_days',
       teamSize: '2-5',
       timeline: 'this_week',
-      role: 'HR Manager'
-    }
+      role: 'HR Manager',
+    },
   },
   {
     name: 'Document Collection',
@@ -43,8 +43,8 @@ const testTemplates = [
       demoDuration: '30_days',
       teamSize: '6-20',
       timeline: 'this_month',
-      role: 'Operations Manager'
-    }
+      role: 'Operations Manager',
+    },
   },
   {
     name: 'Custom Workflow',
@@ -56,9 +56,9 @@ const testTemplates = [
       demoDuration: '30_days',
       teamSize: '21-50',
       timeline: 'exploring',
-      role: 'IT Director'
-    }
-  }
+      role: 'IT Director',
+    },
+  },
 ];
 
 /**
@@ -83,9 +83,9 @@ function applyTemplate(template: any) {
   testTimeline = template.data.timeline;
   testRole = template.data.role;
   testEmail = createTestEmail();
-  
+
   success = `Applied template: ${template.name}`;
-  setTimeout(() => success = null, 3000);
+  setTimeout(() => (success = null), 3000);
 }
 
 /**
@@ -96,11 +96,11 @@ async function detectApiServer(): Promise<string> {
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
     return 'https://dev.thepia.com:8443';
   }
-  
+
   // Try local development server first
   try {
     const localResponse = await fetch('https://dev.thepia.com:8443/health', {
-      signal: AbortSignal.timeout(3000)
+      signal: AbortSignal.timeout(3000),
     });
     if (localResponse.ok) {
       console.log('🔧 Using local API server: https://dev.thepia.com:8443');
@@ -109,7 +109,7 @@ async function detectApiServer(): Promise<string> {
   } catch (error) {
     console.log('ℹ️ Local API server not available, using production');
   }
-  
+
   // Fallback to production
   console.log('🌐 Using production API server: https://api.thepia.com');
   return 'https://api.thepia.com';
@@ -130,21 +130,27 @@ async function simulateDemoRequest() {
     // Validate test email pattern
     const emailLower = testEmail.toLowerCase();
     const hasValidDomain = emailLower.endsWith('@thepia.net');
-    
+
     if (!hasValidDomain) {
-      throw new Error('Please use test email patterns (test-*@thepia.net or hello+*@thepia.net) to avoid affecting production data');
+      throw new Error(
+        'Please use test email patterns (test-*@thepia.net or hello+*@thepia.net) to avoid affecting production data'
+      );
     }
-    
+
     // Check for valid prefixes more precisely
     const localPart = emailLower.split('@')[0];
     const hasValidPrefix = localPart.includes('test-') || localPart.includes('hello+');
-    
+
     // Additional validation: ensure the prefix is not just at the end
-    const hasProperTestPrefix = localPart.includes('test-') && localPart.indexOf('test-') < localPart.length - 5;
-    const hasProperHelloPrefix = localPart.includes('hello+') && localPart.indexOf('hello+') < localPart.length - 6;
-    
+    const hasProperTestPrefix =
+      localPart.includes('test-') && localPart.indexOf('test-') < localPart.length - 5;
+    const hasProperHelloPrefix =
+      localPart.includes('hello+') && localPart.indexOf('hello+') < localPart.length - 6;
+
     if (!hasValidPrefix || (!hasProperTestPrefix && !hasProperHelloPrefix)) {
-      throw new Error('Please use test email patterns (test-*@thepia.net or hello+*@thepia.net) to avoid affecting production data');
+      throw new Error(
+        'Please use test email patterns (test-*@thepia.net or hello+*@thepia.net) to avoid affecting production data'
+      );
     }
 
     console.log('🧪 Simulating demo request submission...', {
@@ -152,12 +158,12 @@ async function simulateDemoRequest() {
       email: testEmail,
       company: testCompany,
       workflowType: testWorkflowType,
-      comment: testComment
+      comment: testComment,
     });
 
     // Detect and use appropriate API server
     const apiBaseUrl = await detectApiServer();
-    
+
     const requestPayload = {
       name: testName,
       email: testEmail,
@@ -171,7 +177,7 @@ async function simulateDemoRequest() {
       // Additional fields to match FlowsDemoAccessForm
       clientId: '453a82ec-c5b7-48c9-8244-4c978b9c7e11', // Hygge & Hvidløg client UUID
       appId: '83ba72e5-5ede-4917-bbfd-3aeb53e13096', // Employee onboarding app UUID
-      source: 'admin_test_simulation'
+      source: 'admin_test_simulation',
     };
 
     console.log('📤 Sending demo request to:', `${apiBaseUrl}/api/inquiries`);
@@ -181,10 +187,10 @@ async function simulateDemoRequest() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
       body: JSON.stringify(requestPayload),
-      signal: AbortSignal.timeout(15000) // 15 second timeout
+      signal: AbortSignal.timeout(15000), // 15 second timeout
     });
 
     console.log('📥 Response status:', response.status, response.statusText);
@@ -198,37 +204,42 @@ async function simulateDemoRequest() {
         // If response isn't JSON, get text
         try {
           const errorText = await response.text();
-          throw new Error(`Demo request failed: ${response.status} - ${errorText || response.statusText}`);
+          throw new Error(
+            `Demo request failed: ${response.status} - ${errorText || response.statusText}`
+          );
         } catch (textError) {
-          throw new Error(`Demo request failed: ${response.status} - ${response.statusText} (no response body)`);
+          throw new Error(
+            `Demo request failed: ${response.status} - ${response.statusText} (no response body)`
+          );
         }
       }
-      
+
       console.error('❌ Demo request error:', errorData);
-      throw new Error(`Demo request failed: ${response.status} - ${errorData.message || errorData.error || response.statusText}`);
+      throw new Error(
+        `Demo request failed: ${response.status} - ${errorData.message || errorData.error || response.statusText}`
+      );
     }
 
     const result = await response.json();
     console.log('✅ Demo request result:', result);
-    
+
     console.log('✅ Demo request submitted successfully:', result);
-    
+
     lastCreatedRequest = {
       requestId: result.requestId,
       email: testEmail,
       name: testName,
       company: testCompany,
       type: result.type,
-      submittedAt: new Date().toISOString()
+      submittedAt: new Date().toISOString(),
     };
 
     success = `Demo request created successfully! Request ID: ${result.requestId}`;
-    
+
     // Check if this created an invitation in our database
     setTimeout(async () => {
       await checkForCreatedInvitation(testEmail);
     }, 2000);
-
   } catch (err: any) {
     error = err.message || 'Failed to simulate demo request';
     console.error('Error simulating demo request:', err);
@@ -278,10 +289,10 @@ async function checkForCreatedInvitation(email: string) {
 
     if (allInvitations && allInvitations.length > 0) {
       // Look for invitation that matches our email in various possible fields
-      const matchingInvitation = allInvitations.find(inv => {
+      const matchingInvitation = allInvitations.find((inv) => {
         // Check direct email field (if it exists)
         if (inv.email && inv.email === email) return true;
-        
+
         // Check if email is in JWT token
         if (inv.jwt_token) {
           try {
@@ -294,7 +305,7 @@ async function checkForCreatedInvitation(email: string) {
             // JWT decode failed, continue
           }
         }
-        
+
         // Check if created recently (last 30 seconds) as a fallback
         const invitationTime = new Date(inv.created_at).getTime();
         const now = Date.now();
@@ -302,7 +313,7 @@ async function checkForCreatedInvitation(email: string) {
           console.log('📋 Found recent invitation (potential match):', inv);
           return true;
         }
-        
+
         return false;
       });
 
@@ -311,7 +322,7 @@ async function checkForCreatedInvitation(email: string) {
         lastCreatedRequest = {
           ...lastCreatedRequest,
           invitationId: matchingInvitation.id,
-          invitationStatus: matchingInvitation.status
+          invitationStatus: matchingInvitation.status,
         };
         console.log('✅ Found matching invitation:', matchingInvitation);
       } else {

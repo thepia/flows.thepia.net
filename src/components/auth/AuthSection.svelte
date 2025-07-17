@@ -1,6 +1,7 @@
 <script>
-import { onMount } from 'svelte';
 import { thepiaColors } from '@thepia/branding';
+import { onMount } from 'svelte';
+import { cleanInvitationUrl, handleInvitationUrl } from '../../utils/invitationHandler';
 
 // Browser detection for Astro environment
 const browser = typeof window !== 'undefined';
@@ -19,11 +20,11 @@ async function detectApiServer() {
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
     return 'https://dev.thepia.com:8443';
   }
-  
+
   // Try local development server first
   try {
     const localResponse = await fetch('https://dev.thepia.com:8443/health', {
-      signal: AbortSignal.timeout(3000)
+      signal: AbortSignal.timeout(3000),
     });
     if (localResponse.ok) {
       console.log('🔧 Using local API server: https://dev.thepia.com:8443');
@@ -32,7 +33,7 @@ async function detectApiServer() {
   } catch (error) {
     console.log('ℹ️ Local API server not available, using production');
   }
-  
+
   // Fallback to production
   console.log('🌐 Using production API server: https://api.thepia.com');
   return 'https://api.thepia.com';
@@ -68,12 +69,29 @@ onMount(async () => {
     authStore.subscribe(($auth) => {
       currentUser = $auth.user;
       isAuthenticated = $auth.isAuthenticated;
-      
-      // Redirect to app if authenticated
+
+      // Handle invitation URLs and redirect to app if authenticated
       if (isAuthenticated && currentUser) {
+        // Check if this was an invitation flow and clean up URL
+        const url = new URL(window.location.href);
+        const hadToken = url.searchParams.has('token');
+
+        if (hadToken) {
+          // Clean up invitation parameters
+          cleanInvitationUrl();
+          console.log('🔗 Invitation URL cleaned up after successful authentication');
+        }
+
+        // Redirect to app (demo is now consolidated under /app)
         window.location.href = '/app';
       }
     });
+
+    // Handle invitation URLs on component mount
+    if (browser) {
+      const invitationResult = handleInvitationUrl();
+      console.log('🔗 Invitation URL handling result:', invitationResult);
+    }
 
     isLoading = false;
   } catch (err) {
@@ -96,14 +114,14 @@ async function handlePasskeySignIn() {
   try {
     // Try to sign in with passkey using flows-auth
     const result = await authStore.signInWithPasskey(signinEmail);
-    
+
     if (result.step === 'success' && result.user) {
       // Sign-in successful - will auto-redirect via auth state subscription
       console.log('Passkey sign-in successful:', result.user);
     }
   } catch (error) {
     console.error('Passkey sign-in failed:', error);
-    
+
     // Handle specific error cases
     if (error.message?.includes('NotAllowedError')) {
       authError = 'Passkey authentication was cancelled. Please try again.';

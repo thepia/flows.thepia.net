@@ -56,6 +56,15 @@ pnpm dev
 
 The development server runs on `https://dev.thepia.net:5176` with HTTPS for WebAuthn and Supabase Auth compatibility.
 
+### 🔧 **Important: flows-auth Development**
+
+When working with flows-auth changes, see **[DEVELOPMENT.md](./DEVELOPMENT.md)** for detailed setup instructions and troubleshooting.
+
+**Quick commands:**
+- `pnpm run rebuild:flows-auth` - After making flows-auth changes
+- `pnpm run force-refresh` - When pnpm version conflicts occur
+- `pnpm run dev:flows` - For active flows-auth development
+
 ### Available Scripts
 
 ```bash
