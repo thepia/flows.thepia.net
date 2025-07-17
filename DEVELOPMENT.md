@@ -115,11 +115,77 @@ This means the sessionStorage functions aren't exported:
 2. Verify session functions exist: `node -e "const f=require('./node_modules/@thepia/flows-auth/dist/index.cjs'); console.log('Session functions:', Object.keys(f).filter(e => e.includes('Session')))"`
 3. Check browser console for import errors
 
+## GitHub Packages Configuration
+
+### ⚠️ **CRITICAL**: Ensure `@thepia` scope is configured correctly
+
+For `pnpm install` to work with `@thepia/flows-auth` and other Thepia packages, you **MUST** have proper GitHub Packages authentication configured.
+
+#### **Quick Check**
+```bash
+pnpm config get @thepia:registry
+# Should return: https://npm.pkg.github.com
+```
+
+If it returns `undefined`, follow the setup below.
+
+#### **One-Time Setup**
+
+**Option 1: User-level config (Recommended)**
+```bash
+# Configure the @thepia scope to use GitHub Packages
+pnpm config set @thepia:registry https://npm.pkg.github.com
+
+# Set your GitHub Personal Access Token
+pnpm config set //npm.pkg.github.com/:_authToken YOUR_GITHUB_TOKEN
+```
+
+**Option 2: Project-level .npmrc**
+Create `.npmrc` in project root:
+```
+@thepia:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+```
+
+#### **Getting Your GitHub Token**
+1. Go to GitHub → Settings → Developer settings → Personal access tokens
+2. Generate token with `read:packages` permission
+3. Use the token in the config above
+
+#### **Common Issues**
+
+**❌ `@thepian` vs `@thepia` scope mismatch**
+```bash
+# Remove incorrect scope if it exists
+pnpm config delete @thepian:registry
+
+# Set correct scope
+pnpm config set @thepia:registry https://npm.pkg.github.com
+```
+
+**❌ "404 Not Found" when installing `@thepia/flows-auth`**
+- Check your GitHub token has `read:packages` permission
+- Verify you have access to the `thepia` organization
+- Ensure the token is correctly set in npmrc
+
+**❌ "ENOTFOUND npm.pkg.github.com"**
+- Check your internet connection
+- Verify the registry URL is correct (no trailing slash)
+
+#### **Verification**
+```bash
+# Test that @thepia packages can be accessed
+pnpm view @thepia/flows-auth
+
+# Should show package information, not 404 error
+```
+
 ## Best Practices
 
 1. **Always run `pnpm rebuild:flows-auth` after making flows-auth changes**
 2. **Use `pnpm dev:flows` for active flows-auth development**
 3. **Hard refresh browser after flows-auth changes**
 4. **Keep flows-auth build:watch running in a separate terminal**
+5. **Ensure `@thepia` scope is configured before running `pnpm install`**
 
 This eliminates the disruptive cache/build/reload cycle and provides predictable development workflow.

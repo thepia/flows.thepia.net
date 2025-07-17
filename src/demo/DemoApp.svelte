@@ -127,47 +127,39 @@ async function _handleSignOut() {
 
 <!-- Main Demo App Container -->
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-  <!-- Header -->
-  <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <!-- Logo -->
-        <div class="flex items-center">
-          <img src="/favicon.svg" alt="Thepia" class="h-8 w-8 mr-3" />
-          <h1 class="text-xl font-bold text-gray-900 dark:text-white">
-            Thepia Flows Demo
-          </h1>
-        </div>
+  <!-- Only show header for unauthenticated states -->
+  {#if !isAuthenticated}
+    <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <!-- Logo -->
+          <div class="flex items-center">
+            <img src="/favicon.svg" alt="Thepia" class="h-8 w-8 mr-3" />
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">
+              Thepia Flows Demo
+            </h1>
+          </div>
 
-        <!-- Auth Status -->
-        <div class="flex items-center gap-4">
-          {#if authLoaded && isAuthenticated && currentUser}
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              Welcome, {currentUser.email || 'User'}
-            </span>
-            <button
-              on:click={_handleSignOut}
-              class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 
-                     text-gray-700 dark:text-gray-300 rounded-md transition-colors"
-            >
-              Sign Out
-            </button>
-          {:else if authLoaded && !isAuthenticated}
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              Not signed in
-            </span>
-          {:else}
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              Loading...
-            </span>
-          {/if}
+          <!-- Auth Status -->
+          <div class="flex items-center gap-4">
+            {#if authLoaded && !isAuthenticated}
+              <span class="text-sm text-gray-600 dark:text-gray-400">
+                Not signed in
+              </span>
+            {:else}
+              <span class="text-sm text-gray-600 dark:text-gray-400">
+                Loading...
+              </span>
+            {/if}
+          </div>
         </div>
       </div>
-    </div>
-  </header>
+    </header>
+  {/if}
 
   <!-- Main Content -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  {#if !isAuthenticated}
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     {#if authError}
       <!-- Error State -->
       <div class="text-center py-12">
@@ -206,32 +198,33 @@ async function _handleSignOut() {
         on:success={_handleAuthSuccess}
         on:error={_handleAuthError}
       />
-    {:else}
-      <!-- Authenticated Demo Content -->
-      <DemoContent
-        {currentUser}
-        {invitationToken}
-        on:signOut={_handleSignOut}
-      />
     {/if}
-  </main>
+    </main>
 
-  <!-- Footer -->
-  <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="text-center text-sm text-gray-600 dark:text-gray-400">
-        <p>
-          Thepia Flows Demo - 
-          <a href="https://thepia.com" class="text-primary hover:underline">
-            Learn more about Thepia
-          </a>
-        </p>
-        {#if invitationToken}
-          <p class="mt-1 text-xs">
-            Accessed via invitation token
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="text-center text-sm text-gray-600 dark:text-gray-400">
+          <p>
+            Thepia Flows Demo - 
+            <a href="https://thepia.com" class="text-primary hover:underline">
+              Learn more about Thepia
+            </a>
           </p>
-        {/if}
+          {#if invitationToken}
+            <p class="mt-1 text-xs">
+              Accessed via invitation token
+            </p>
+          {/if}
+        </div>
       </div>
-    </div>
-  </footer>
+    </footer>
+  {:else}
+    <!-- Authenticated Demo Content -->
+    <DemoContent
+      {currentUser}
+      {invitationToken}
+      on:signOut={_handleSignOut}
+    />
+  {/if}
 </div>

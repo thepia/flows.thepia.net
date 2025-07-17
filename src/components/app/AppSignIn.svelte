@@ -1,9 +1,9 @@
 <script lang="ts">
 import { thepiaColors } from '@thepia/branding';
 import { onMount } from 'svelte';
-import { cleanInvitationUrl } from '../../utils/invitationHandler';
 import DemoApp from '../../demo/DemoApp.svelte';
 import LoadingSpinner from '../../demo/LoadingSpinner.svelte';
+import { cleanInvitationUrl } from '../../utils/invitationHandler';
 
 // Browser detection for Astro
 const browser = typeof window !== 'undefined';
@@ -13,14 +13,19 @@ let SignInForm = null;
 let authLoaded = false;
 let determiningMode = false;
 let authError = null;
-let showingDemo = false;
 let invitationToken = null;
 let tokenData = null;
 let showRegistrationForm = false;
 let isSubmitting = false;
 let tokenValid = false;
 let signinEmail = '';
+let isAuthenticated = false;
+let currentUser = null;
 let isSigningIn = false;
+
+// Session functions - loaded dynamically
+let isAuthenticatedFromSession = null;
+let getCurrentUserFromSession = null;
 
 // Registration form data
 let registrationData = {
@@ -94,14 +99,18 @@ onMount(async () => {
     // Dynamically import flows-auth to avoid SSR issues
     const flowsAuthModule = await import('@thepia/flows-auth');
     console.log('🔍 Available flows-auth exports:', Object.keys(flowsAuthModule));
-    
-    const { 
-      createAuthStore, 
+
+    const {
+      createAuthStore,
       SignInForm: AuthForm,
-      isAuthenticatedFromSession,
-      getCurrentUserFromSession 
+      isAuthenticatedFromSession: sessionAuthCheck,
+      getCurrentUserFromSession: sessionUserCheck
     } = flowsAuthModule;
-    
+
+    // Store session functions for use throughout component
+    isAuthenticatedFromSession = sessionAuthCheck;
+    getCurrentUserFromSession = sessionUserCheck;
+
     console.log('🔍 Session functions loaded:', {
       isAuthenticatedFromSession: typeof isAuthenticatedFromSession,
       getCurrentUserFromSession: typeof getCurrentUserFromSession
@@ -112,6 +121,16 @@ onMount(async () => {
     const apiBaseUrl = await detectApiServer();
     console.log('🔧 Using API server:', apiBaseUrl);
 
+    // Configure storage for debugging
+    const { configureSessionStorage, getStorageConfig } = flowsAuthModule;
+    configureSessionStorage({
+      type: 'sessionStorage',
+      userRole: 'employee', // Use employee for testing (longer timeout)
+      sessionTimeout: 24 * 60 * 60 * 1000 // 24 hours for debugging
+    });
+
+    console.log('🗄️ Storage configured:', getStorageConfig());
+
     authStore = createAuthStore({
       apiBaseUrl: apiBaseUrl,
       clientId: 'thepia-flows-app',
@@ -120,6 +139,11 @@ onMount(async () => {
       enableMagicLinks: true,
       enableSocialLogin: false,
       enablePasswordLogin: false,
+      storage: {
+        type: 'sessionStorage',
+        userRole: 'employee',
+        sessionTimeout: 24 * 60 * 60 * 1000
+      },
       branding: {
         companyName: 'Thepia Flows',
         logoUrl: '/favicon.svg',
@@ -127,64 +151,87 @@ onMount(async () => {
       },
     });
 
+    // Create updateAuthState function following the implementation guide
+    function updateAuthState() {
+      try {
+        isAuthenticated = isAuthenticatedFromSession();
+        currentUser = getCurrentUserFromSession();
+
+        console.log('🔍 Auth state updated:', {
+          isAuthenticated,
+          hasUser: !!currentUser,
+          source: 'updateAuthState'
+        });
+
+        // Clean up invitation URL if authenticated
+        if (isAuthenticated && currentUser && invitationToken) {
+          cleanInvitationUrl();
+          console.log('🔗 Invitation URL cleaned up after authentication');
+        }
+      } catch (error) {
+        console.error('Session check failed:', error);
+        // Fallback to unauthenticated state
+        isAuthenticated = false;
+        currentUser = null;
+      }
+    }
+
     // Listen for sessionUpdate events (proper thepia.com pattern)
     window.addEventListener('sessionUpdate', (event) => {
-      const isAuthenticated = isAuthenticatedFromSession();
-      const currentUser = getCurrentUserFromSession();
-      
-      console.log('🔍 Session updated:', {
+      updateAuthState();
+
+      console.log('🔍 Session updated via event:', {
         isAuthenticated,
         hasUser: !!currentUser,
-        sessionData: event.detail,
-        currentShowingDemo: showingDemo
+        sessionData: event.detail
       });
-      
-      // When user is authenticated via WebAuthn, show the app
-      if (isAuthenticated && currentUser) {
-        // Clean up invitation URL if it was an invitation flow
-        if (invitationToken) {
-          cleanInvitationUrl();
-          console.log('🔗 Invitation URL cleaned up after WebAuthn authentication');
-        }
-        
-        // Show the authenticated app content
-        showingDemo = true;
-        console.log('🎯 WebAuthn authenticated - showing app content, showingDemo now:', showingDemo);
-      } else {
-        // User is not authenticated, hide demo content
-        if (showingDemo) {
-          showingDemo = false;
-          console.log('🔍 User not authenticated, hiding demo content');
-        }
-      }
     });
-    
-    // Also subscribe to auth store for backward compatibility and additional state
+
+    // Subscribe to auth store primarily for error handling and state transitions
     authStore.subscribe(($auth) => {
+      // Always update from session (source of truth)
+      updateAuthState();
+
       console.log('🔍 Auth store state changed:', {
         storeState: $auth.state,
         storeUser: !!$auth.user,
-        sessionAuthenticated: isAuthenticatedFromSession(),
-        sessionUser: !!getCurrentUserFromSession()
+        storeAccessToken: !!$auth.accessToken,
+        sessionAuthenticated: isAuthenticated,
+        sessionUser: !!currentUser
       });
+
+      // Debug: Check what's in sessionStorage
+      const sessionData = sessionStorage.getItem('thepia_auth_session');
+      console.log('🔍 SessionStorage content:', sessionData ? 'HAS DATA' : 'EMPTY');
+
+      // Debug: Check session functions
+      if (isAuthenticatedFromSession && getCurrentUserFromSession) {
+        console.log('🔍 Session function results:', {
+          isAuthenticatedFromSession: isAuthenticatedFromSession(),
+          getCurrentUserFromSession: getCurrentUserFromSession()
+        });
+      }
+
+      // Handle auth store errors
+      if ($auth.state === 'error') {
+        authError = $auth.error;
+        console.error('Auth store error:', $auth.error);
+      }
     });
 
     authLoaded = true;
 
     // Check for existing session on page load
-    const existingAuth = isAuthenticatedFromSession();
-    const existingUser = getCurrentUserFromSession();
+    updateAuthState();
     
     console.log('🔍 Initial session check:', {
-      isAuthenticated: existingAuth,
-      hasUser: !!existingUser,
+      isAuthenticated,
+      hasUser: !!currentUser,
       invitationToken: !!invitationToken
     });
     
-    if (existingAuth && existingUser) {
-      // User is already authenticated, show the app immediately
-      showingDemo = true;
-      console.log('🎯 User already authenticated - showing app immediately');
+    if (isAuthenticated && currentUser) {
+      console.log('🎯 User already authenticated');
       
       // Clean up invitation URL if present
       if (invitationToken) {
@@ -246,8 +293,8 @@ async function checkTokenAndUserStatus() {
             window.ErrorReporter.reportInfo('Token hash verification', {
               email: tokenData.email,
               hasStoredHash: !!userCheck.invitationTokenHash,
-              storedHashPreview: userCheck.invitationTokenHash?.substring(0, 8) + '...',
-              currentHashPreview: currentTokenHash?.substring(0, 8) + '...',
+              storedHashPreview: `${userCheck.invitationTokenHash?.substring(0, 8)}...`,
+              currentHashPreview: `${currentTokenHash?.substring(0, 8)}...`,
               hashesMatch: currentTokenHash === userCheck.invitationTokenHash
             });
           }
@@ -348,15 +395,6 @@ function handleAuthError(event) {
   }, 5000);
 }
 
-// Show demo mode
-function showDemo() {
-  showingDemo = true;
-}
-
-// Hide demo mode
-function hideDemo() {
-  showingDemo = false;
-}
 
 // Decode JWT invitation token
 function decodeInvitationToken(token) {
@@ -848,7 +886,7 @@ async function handlePasskeySignIn() {
             <p>Already have an account? <button on:click={switchToSignIn} class="link-button">Sign in instead</button></p>
           </div>
         </div>
-      {:else if authLoaded && !showingDemo && !showRegistrationForm}
+      {:else if authLoaded && !isAuthenticated && !showRegistrationForm}
         <!-- Regular Passkey Sign In -->
         <div class="signin-container">
           <h2 class="signin-title">Sign In</h2>
@@ -891,7 +929,7 @@ async function handlePasskeySignIn() {
             </div>
           </div>
         </div>
-      {:else if showingDemo}
+      {:else if isAuthenticated && currentUser}
         <!-- Authenticated Demo App -->
         <DemoApp />
       {:else}
@@ -910,7 +948,7 @@ async function handlePasskeySignIn() {
       <a href="/" class="footer-link">← Back to Home</a>
       {#if !showRegistrationForm}
         <span class="footer-divider">•</span>
-        <button on:click={showDemo} class="footer-link" disabled={showingDemo}>
+        <button class="footer-link" disabled={isAuthenticated}>
           Try Demo
         </button>
       {/if}

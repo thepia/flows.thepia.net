@@ -67,25 +67,54 @@ onMount(async () => {
 
     // Subscribe to auth state changes
     authStore.subscribe(($auth) => {
+      // Derive isAuthenticated from state
+      const authIsAuthenticated = $auth.state === 'authenticated';
+
+      console.log('🔍 AuthSection: Auth state changed:', {
+        isAuthenticated: authIsAuthenticated,
+        hasUser: !!$auth.user,
+        userEmail: $auth.user?.email,
+        state: $auth.state
+      });
+
       currentUser = $auth.user;
-      isAuthenticated = $auth.isAuthenticated;
+      isAuthenticated = authIsAuthenticated;
 
       // Handle invitation URLs and redirect to app if authenticated
       if (isAuthenticated && currentUser) {
-        // Check if this was an invitation flow and clean up URL
+        // Check if this was an invitation flow
         const url = new URL(window.location.href);
         const hadToken = url.searchParams.has('token');
 
         if (hadToken) {
+          // FR9.6: Invitation flow (?token= present) MAY redirect to /app after authentication
+          console.log('🚀 AuthSection: Invitation flow - redirecting to /app:', currentUser.email);
+
           // Clean up invitation parameters
           cleanInvitationUrl();
           console.log('🔗 Invitation URL cleaned up after successful authentication');
-        }
 
-        // Redirect to app (demo is now consolidated under /app)
-        window.location.href = '/app';
+          // Redirect to app for invitation flows
+          window.location.href = '/app';
+        } else {
+          // FR9.2: Normal authentication - show "Open Demo" button, don't auto-redirect
+          console.log('🔍 AuthSection: User authenticated, showing Open Demo button for:', currentUser.email);
+        }
       }
     });
+
+    // Check initial authentication state using the isAuthenticated function
+    const initialIsAuthenticated = authStore.isAuthenticated();
+    console.log('🔍 AuthSection: Initial auth state check:', {
+      isAuthenticated: initialIsAuthenticated
+    });
+
+    // FR9.2: AuthSection MUST NOT automatically redirect authenticated users from landing page
+    // Instead, show "Open Demo" button and let users choose
+    if (initialIsAuthenticated) {
+      console.log('🔍 AuthSection: User already authenticated, showing Open Demo button');
+      // Don't redirect automatically - let the subscription handle UI updates
+    }
 
     // Handle invitation URLs on component mount
     if (browser) {
@@ -113,11 +142,18 @@ async function handlePasskeySignIn() {
 
   try {
     // Try to sign in with passkey using flows-auth
+    console.log('🔍 AuthSection: About to call signInWithPasskey for:', signinEmail);
     const result = await authStore.signInWithPasskey(signinEmail);
+    console.log('🔍 AuthSection: signInWithPasskey result:', result);
 
     if (result.step === 'success' && result.user) {
       // Sign-in successful - will auto-redirect via auth state subscription
-      console.log('Passkey sign-in successful:', result.user);
+      console.log('✅ AuthSection: Passkey sign-in successful:', result.user);
+      console.log('🔍 AuthSection: Auth store isAuthenticated after sign-in:', authStore.isAuthenticated());
+    } else if (result.success && result.user) {
+      // Handle new response format
+      console.log('✅ AuthSection: Passkey sign-in successful (new format):', result.user);
+      console.log('🔍 AuthSection: Auth store isAuthenticated after sign-in:', authStore.isAuthenticated());
     }
   } catch (error) {
     console.error('Passkey sign-in failed:', error);
@@ -173,8 +209,14 @@ function clearError() {
       <svg class="w-12 h-12 text-green-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
       </svg>
-      <h3 class="text-lg font-medium text-green-800 mb-2">Welcome back!</h3>
-      <p class="text-green-600 mb-4">Redirecting to demo...</p>
+      <h3 class="text-lg font-medium text-green-800 mb-2">Welcome back, {currentUser?.email || 'User'}!</h3>
+      <p class="text-green-600 mb-4">You're already signed in.</p>
+      <button
+        on:click={() => window.location.href = '/app'}
+        class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200"
+      >
+        Open Demo App
+      </button>
     </div>
   {:else}
     <!-- Sign In State -->

@@ -68,9 +68,9 @@ import TeamMeetingIllustration from '../../assets/illustrations/Team_meeting_Mon
       
       <!-- CTA Buttons -->
       <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
-        <a href="#auth" class="btn-primary text-lg px-8 py-4">
+        <button id="main-open-button" class="btn-primary text-lg px-8 py-4">
           Try Live Demo
-        </a>
+        </button>
         <a href="#how-it-works" class="btn-outline text-lg px-8 py-4">
           Learn More
         </a>
@@ -95,6 +95,50 @@ import TeamMeetingIllustration from '../../assets/illustrations/Team_meeting_Mon
     </div>
   </div>
 </section>
+
+<script>
+  // FR9.4 & FR9.5: Landing page "Open Button" behavior
+  document.addEventListener('DOMContentLoaded', () => {
+    const openButton = document.getElementById('main-open-button');
+
+    if (openButton) {
+      openButton.addEventListener('click', async () => {
+        try {
+          // Dynamically import flows-auth to check authentication status
+          const { isAuthenticatedFromSession } = await import('@thepia/flows-auth');
+
+          if (isAuthenticatedFromSession()) {
+            // FR9.4: Navigate to /app if user is authenticated
+            console.log('🚀 Hero: User authenticated, navigating to /app');
+            window.location.href = '/app';
+          } else {
+            // FR9.5: Scroll to AuthSection if user is not authenticated
+            console.log('🔍 Hero: User not authenticated, scrolling to AuthSection');
+            const authSection = document.getElementById('auth');
+            if (authSection) {
+              authSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+              });
+            } else {
+              // Fallback: navigate to auth anchor
+              window.location.href = '#auth';
+            }
+          }
+        } catch (error) {
+          console.error('Error checking authentication status:', error);
+          // Fallback: scroll to auth section
+          const authSection = document.getElementById('auth');
+          if (authSection) {
+            authSection.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            window.location.href = '#auth';
+          }
+        }
+      });
+    }
+  });
+</script>
 
 <style>
   /* Smooth scroll behavior for anchor links */

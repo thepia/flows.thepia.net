@@ -29,6 +29,7 @@
     "setup:flows-auth-dev": "./scripts/setup-flows-auth-dev.sh",
     "rebuild:flows-auth": "cd ../flows-auth && pnpm build && cd ../flows.thepia.net && rm -rf node_modules/.vite && rm -rf .astro && rm -rf node_modules/@thepia && pnpm install --force",
     "force-refresh": "./scripts/force-refresh-flows-auth.sh",
+    "nuclear-update": "./scripts/nuclear-flows-auth-update.sh",
     "install:with-env": "set -a && [ -f .env ] && . ./.env && set +a && pnpm install"
   },
   "dependencies": {
@@ -43,7 +44,7 @@
     "bits-ui": "^2.8.11",
     "clsx": "^2.1.1",
     "lucide-svelte": "^0.525.0",
-    "shadcn-svelte": "^1.0.6",
+    "shadcn-svelte": "^0.14.1",
     "svelte": "^4.2.19",
     "tailwind-merge": "^3.3.1",
     "tailwind-variants": "^1.0.0",

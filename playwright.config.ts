@@ -18,10 +18,13 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://dev.thepia.net:5178',
+    baseURL: 'https://dev.thepia.net:5176',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    
+    /* Ignore SSL errors for dev server */
+    ignoreHTTPSErrors: true,
   },
 
   /* Configure projects for major browsers */
@@ -63,9 +66,9 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'pnpm dev',
-    url: 'http://dev.thepia.net:5178',
-    reuseExistingServer: !process.env.CI,
-  },
+  // webServer: {
+  //   command: 'pnpm dev',
+  //   url: 'http://dev.thepia.net:5178',
+  //   reuseExistingServer: true, // Always reuse existing server
+  // },
 });

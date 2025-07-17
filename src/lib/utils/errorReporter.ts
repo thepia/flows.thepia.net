@@ -1,12 +1,12 @@
 /**
- * Error Reporting Utilities for flows.thepia.net
+ * Error Reporting Utilities for Flows Admin Demo
  *
- * Purpose: Configurable error reporting for flows admin interface issues during development
+ * Purpose: Configurable error reporting for admin dashboard issues during development
  * Context: This enables debugging of Supabase data loading, UI errors, and admin flow issues
  */
 
-export interface FlowsErrorEvent {
-  type: 'flows-error';
+export interface AdminErrorEvent {
+  type: 'admin-error';
   operation: 'data-load' | 'api-call' | 'ui-interaction' | 'auth-error' | 'validation-error';
   error: any;
   context?: Record<string, any>;
@@ -28,7 +28,7 @@ export interface UiErrorEvent {
   context?: Record<string, any>;
 }
 
-export type FlowsErrorReportEvent = FlowsErrorEvent | DataErrorEvent | UiErrorEvent;
+export type AdminErrorReportEvent = AdminErrorEvent | DataErrorEvent | UiErrorEvent;
 
 export interface ErrorReporterConfig {
   enabled: boolean;
@@ -38,10 +38,10 @@ export interface ErrorReporterConfig {
   retryDelay?: number;
 }
 
-class FlowsErrorReporter {
+class AdminErrorReporter {
   private config: ErrorReporterConfig;
-  private queue: FlowsErrorReportEvent[] = [];
-  private retryQueue: { event: FlowsErrorReportEvent; attempts: number }[] = [];
+  private queue: AdminErrorReportEvent[] = [];
+  private retryQueue: { event: AdminErrorReportEvent; attempts: number }[] = [];
 
   constructor(config: ErrorReporterConfig = { enabled: false }) {
     this.config = {
@@ -56,22 +56,22 @@ class FlowsErrorReporter {
     this.config = { ...this.config, ...config };
   }
 
-  async report(event: FlowsErrorReportEvent) {
+  async report(event: AdminErrorReportEvent) {
     if (!this.config.enabled) {
       if (this.config.debug) {
-        console.log('📊 [FlowsErrorReporter] Event (reporting disabled):', event);
+        console.log('📊 [AdminErrorReporter] Event (reporting disabled):', event);
       }
       return;
     }
 
     if (this.config.debug) {
-      console.log('📊 [FlowsErrorReporter] Reporting event:', event);
+      console.log('📊 [AdminErrorReporter] Reporting event:', event);
     }
 
     if (!this.config.endpoint) {
       this.queue.push(event);
       if (this.config.debug) {
-        console.warn('📊 [FlowsErrorReporter] No endpoint configured, queuing event');
+        console.warn('📊 [AdminErrorReporter] No endpoint configured, queuing event');
       }
       return;
     }
@@ -79,19 +79,19 @@ class FlowsErrorReporter {
     try {
       await this.sendEvent(event);
     } catch (error) {
-      console.warn('📊 [FlowsErrorReporter] Failed to send event:', error);
+      console.warn('📊 [AdminErrorReporter] Failed to send event:', error);
       this.retryQueue.push({ event, attempts: 0 });
       this.scheduleRetry();
     }
   }
 
-  private async sendEvent(event: FlowsErrorReportEvent) {
+  private async sendEvent(event: AdminErrorReportEvent) {
     const payload = {
       ...event,
       timestamp: Date.now(),
       userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
       url: typeof window !== 'undefined' ? window.location.href : 'unknown',
-      app: 'flows.thepia.net',
+      app: 'flows-admin-demo',
       version: '1.0.0',
     };
 
@@ -101,7 +101,7 @@ class FlowsErrorReporter {
 
     let response: Response;
     try {
-      response = await fetch(this.config.endpoint as string, {
+      response = await fetch(this.config.endpoint!, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload),
@@ -115,7 +115,7 @@ class FlowsErrorReporter {
     }
 
     if (this.config.debug) {
-      console.log('📊 [FlowsErrorReporter] Event sent successfully');
+      console.log('📊 [AdminErrorReporter] Event sent successfully');
     }
   }
 
@@ -126,19 +126,19 @@ class FlowsErrorReporter {
   }
 
   private async processRetryQueue() {
-    const failedRetries: { event: FlowsErrorReportEvent; attempts: number }[] = [];
+    const failedRetries: { event: AdminErrorReportEvent; attempts: number }[] = [];
 
     for (const { event, attempts } of this.retryQueue) {
-      if (attempts >= (this.config.maxRetries as number)) {
+      if (attempts >= this.config.maxRetries!) {
         if (this.config.debug) {
-          console.warn('📊 [FlowsErrorReporter] Max retries reached for event:', event);
+          console.warn('📊 [AdminErrorReporter] Max retries reached for event:', event);
         }
         continue;
       }
 
       try {
         await this.sendEvent(event);
-      } catch (_error) {
+      } catch (error) {
         failedRetries.push({ event, attempts: attempts + 1 });
       }
     }
@@ -152,7 +152,7 @@ class FlowsErrorReporter {
 
   flushQueue() {
     if (!this.config.endpoint) {
-      console.warn('📊 [FlowsErrorReporter] Cannot flush queue: no endpoint configured');
+      console.warn('📊 [AdminErrorReporter] Cannot flush queue: no endpoint configured');
       return;
     }
 
@@ -168,20 +168,20 @@ class FlowsErrorReporter {
 }
 
 // Global reporter instance
-let reporter: FlowsErrorReporter | null = null;
+let reporter: AdminErrorReporter | null = null;
 
-export function initializeFlowsErrorReporter(config: ErrorReporterConfig) {
-  reporter = new FlowsErrorReporter(config);
+export function initializeAdminErrorReporter(config: ErrorReporterConfig) {
+  reporter = new AdminErrorReporter(config);
 
   if (config.debug) {
-    console.log('📊 [FlowsErrorReporter] Initialized with config:', config);
+    console.log('📊 [AdminErrorReporter] Initialized with config:', config);
   }
 }
 
-export function updateFlowsErrorReporterConfig(config: Partial<ErrorReporterConfig>) {
+export function updateAdminErrorReporterConfig(config: Partial<ErrorReporterConfig>) {
   if (!reporter) {
     console.warn(
-      '📊 [FlowsErrorReporter] Not initialized. Call initializeFlowsErrorReporter first.'
+      '📊 [AdminErrorReporter] Not initialized. Call initializeAdminErrorReporter first.'
     );
     return;
   }
@@ -189,15 +189,15 @@ export function updateFlowsErrorReporterConfig(config: Partial<ErrorReporterConf
   reporter.updateConfig(config);
 }
 
-export function reportFlowsError(
-  operation: FlowsErrorEvent['operation'],
+export function reportAdminError(
+  operation: AdminErrorEvent['operation'],
   error: any,
   context?: Record<string, any>
 ) {
   if (!reporter) return;
 
   reporter.report({
-    type: 'flows-error',
+    type: 'admin-error',
     operation,
     error: {
       name: error?.name,
@@ -253,12 +253,12 @@ export function reportUiError(
   });
 }
 
-export function flushFlowsErrorReports() {
+export function flushAdminErrorReports() {
   if (!reporter) return;
   reporter.flushQueue();
 }
 
-export function getFlowsErrorReportQueueSize() {
+export function getAdminErrorReportQueueSize() {
   if (!reporter) return 0;
   return reporter.getQueueSize();
 }
