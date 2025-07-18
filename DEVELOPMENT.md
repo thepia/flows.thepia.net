@@ -2,6 +2,31 @@
 
 This document provides definitive solutions for the disruptive cache/build issues when developing with flows-auth.
 
+## 🏗️ **CRITICAL: Static Prerendering Architecture**
+
+**flows.thepia.net uses STATIC PRERENDERING, not SSR**
+
+- **✅ All pages**: `prerender = true` (static generation)
+- **❌ NO SSR**: Only `/dev/*` paths use SSR
+- **❌ NO dynamic imports**: Use standard ES6 imports for @thepia/flows-auth
+- **❌ NO browser guards**: Components run during build, not in browser
+
+### **Import Pattern**
+```typescript
+// ✅ CORRECT: Static imports (works with prerender = true)
+import { createAuthStore, SignInForm } from '@thepia/flows-auth';
+
+// ❌ WRONG: Dynamic imports (only needed for SSR)
+const { createAuthStore } = await import('@thepia/flows-auth');
+```
+
+### **Why This Matters**
+- **Static prerendering** = HTML generated at build time
+- **SSR** = HTML generated at request time  
+- **flows-auth** works perfectly with static prerendering
+- **No browser APIs** are called during build phase
+- **Dynamic imports** are unnecessary and add complexity
+
 ## 🚀 **Quick Start**
 
 **After making flows-auth changes:**

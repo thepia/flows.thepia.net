@@ -1,10 +1,13 @@
 ---
 // App page with authentication - Full-screen app experience
+// IMPORTANT: This page uses static prerendering (prerender = true)
+// flows-auth library uses STATIC IMPORTS, not dynamic imports
+// Only /dev/* paths are meant to use SSR
 import '../styles/global.css';
 import { thepiaColors } from '@thepia/branding';
 import AppSignIn from '../components/app/AppSignIn.svelte';
 import FloatingSupportButton from '../components/debug/FloatingSupportButton.svelte';
-export const prerender = false; // Dynamic page for auth
+export const prerender = true; // Static generation - USE STATIC IMPORTS in components
 ---
 
 <!doctype html>

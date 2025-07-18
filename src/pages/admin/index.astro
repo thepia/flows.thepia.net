@@ -1,4 +1,8 @@
 ---
+// Admin dashboard - Static prerendered page
+// IMPORTANT: This page uses static prerendering (prerender = true)
+// flows-auth library uses STATIC IMPORTS, not dynamic imports
+// Only /dev/* paths are meant to use SSR
 import AdminApp from '../../components/admin/AdminApp.svelte';
 import FloatingSupportButton from '../../components/debug/FloatingSupportButton.svelte';
 import Layout from '../../layouts/Layout.astro';
@@ -6,6 +10,8 @@ import Layout from '../../layouts/Layout.astro';
 // Page metadata
 const title = 'Admin Dashboard - Thepia Flows';
 const description = 'Administrative interface for managing demo invitations and user permissions.';
+
+export const prerender = true; // Static generation - USE STATIC IMPORTS in components
 ---
 
 <Layout title={title} description={description}>

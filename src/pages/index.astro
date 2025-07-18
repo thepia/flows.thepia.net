@@ -1,4 +1,8 @@
 ---
+// Landing page with authentication - Static prerendered page
+// IMPORTANT: This page uses static prerendering (prerender = true)
+// flows-auth library uses STATIC IMPORTS, not dynamic imports
+// Only /dev/* paths are meant to use SSR
 import AuthSection from '../components/auth/AuthSection.svelte';
 import Features from '../components/landing/Features.astro';
 import Footer from '../components/landing/Footer.astro';
@@ -10,6 +14,8 @@ import Layout from '../layouts/Layout.astro';
 const title = 'Thepia Flows - Custom Workflow Apps for Personal Devices';
 const description =
   "We build privacy-first workflow applications that run on your employees' BYOD/Personally Assigned devices. Mobile-optimized, camera-enabled, and designed for seamless visual documentation.";
+
+export const prerender = true; // Static generation - USE STATIC IMPORTS in components
 ---
 
 <Layout title={title} description={description}>
