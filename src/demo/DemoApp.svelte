@@ -51,12 +51,21 @@ onMount(async () => {
   console.log('Demo app starting up...', { invitationToken: !!invitationToken });
 
   try {
-    // Dynamically import flows-auth session functions
+    // Dynamically import flows-auth session functions and auth store
     const { 
       isAuthenticatedFromSession,
       getCurrentUserFromSession,
-      getAccessTokenFromSession 
+      getAccessTokenFromSession,
+      createAuthStore 
     } = await import('@thepia/flows-auth');
+
+    // Initialize auth store for sign out functionality
+    const apiBaseUrl = await detectApiServer();
+    authStore = createAuthStore({
+      apiBaseUrl,
+      sessionStorage: 'session' // Use sessionStorage for this demo
+    });
+    console.log('🔒 Auth store initialized for DemoApp');
 
     // Check authentication from sessionStorage (thepia.com pattern)
     isAuthenticated = isAuthenticatedFromSession();
@@ -111,16 +120,37 @@ function _handleAuthError(event) {
 
 // Handle sign out
 async function _handleSignOut() {
-  if (authStore) {
-    try {
+  if (!browser) return;
+  
+  const userEmail = currentUser?.email;
+  console.log('🔒 DemoApp sign out initiated', { userEmail });
+  
+  try {
+    if (authStore) {
+      // Use proper auth store signOut method
+      console.log('🔒 Signing out via auth store...');
       await authStore.signOut();
-      currentUser = null;
-      isAuthenticated = false;
-      console.log('Signed out successfully');
-    } catch (error) {
-      console.error('Sign out failed:', error);
-      authError = error.message || 'Sign out failed';
+      console.log('✅ Auth store sign out completed');
+    } else {
+      // Fallback to manual cleanup if auth store not available
+      console.warn('⚠️ Auth store not available, falling back to manual cleanup');
+      sessionStorage.removeItem('auth_access_token');
+      sessionStorage.removeItem('auth_user');
     }
+    
+    // Update local state
+    currentUser = null;
+    isAuthenticated = false;
+    
+    // Dispatch session update event for other components
+    window.dispatchEvent(new CustomEvent('sessionUpdate', {
+      detail: { isAuthenticated: false, user: null }
+    }));
+    
+    console.log('✅ DemoApp sign out completed');
+  } catch (error) {
+    console.error('❌ DemoApp sign out failed:', error);
+    authError = error.message || 'Sign out failed';
   }
 }
 </script>

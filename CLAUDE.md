@@ -32,10 +32,10 @@
 - Auth0 integration with credential storage
 - Production-ready security
 
-**❌ flows.thepia.net**: Only has **MOCK/STUB** implementation with:
-- Placeholder code with `alert()` calls in `src/components/auth/AuthSection.svelte`
-- Comment saying "flows-auth integration coming soon"
-- No actual WebAuthn functionality
+**✅ flows.thepia.net**: Uses **flows-auth** library for authentication:
+- Integrated with flows-auth components and auth store
+- Full WebAuthn functionality via flows-auth library
+- Authentication components in `src/components/auth/`
 
 ### Key Clarification:
 - **"Device registration"** refers to Auth0's "Linked Devices" feature for managing user's WebAuthn devices
@@ -43,16 +43,15 @@
 - **NOT** about basic passkey creation/authentication (already working)
 
 ### Priority Tasks:
-1. **Replace mock auth in flows.thepia.net** with actual flows-auth integration
-2. **Remove placeholder `alert()` calls** in authentication components
-3. **Connect AppSignIn.svelte** to use real flows-auth WebAuthn methods
-4. **Test Auth0 "Linked Devices"** functionality for device management
+1. **Test Auth0 "Linked Devices"** functionality for device management
+2. **Complete migration of any remaining auth components** to flows-auth
+3. **Ensure all authentication flows** use flows-auth library
 
 ### Development Notes:
 - flows-auth WebAuthn is production-ready and tested
 - Backend APIs support full WebAuthn flows
-- Demo site just needs to use the real library instead of mocks
-- Focus on integration, not implementation
+- flows.thepia.net uses flows-auth library for all authentication
+- Focus on feature completeness and testing
 
 ## n8n Development Guidelines
 

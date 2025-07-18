@@ -4,7 +4,7 @@
 @import "@thepia/branding/tailwind/variables";
 
 /* Import flows-auth component styles */
-@import "@thepia/flows-auth/dist/style.css";
+@import "@thepia/flows-auth/style.css";
 
 /* Enable class-based dark mode */
 @variant dark (&:where(.dark, .dark *));

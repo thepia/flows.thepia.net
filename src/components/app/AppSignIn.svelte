@@ -321,8 +321,8 @@ function handleAuthError(event) {
 
 // Handle RegistrationForm appAccess event (immediate app access after registration)
 function handleAppAccess(event) {
-  const { user } = event.detail;
-  console.log('Registration successful, granting app access:', user);
+  const { user, autoSignIn, emailVerifiedViaInvitation } = event.detail;
+  console.log('Registration successful, granting app access:', { user, autoSignIn, emailVerifiedViaInvitation });
 
   // Configure storage for employee experience (7-day sessions)
   configureSessionStorage({
@@ -337,10 +337,15 @@ function handleAppAccess(event) {
     cleanInvitationUrl();
   }
 
+  // Close the registration form dialog
+  showRegistrationForm = false;
+  
   // Update auth state for immediate app access
   isAuthenticated = true;
   currentUser = user;
   authError = null;
+  
+  console.log('✅ Registration dialog closed, demo app should now be visible');
 }
 
 // Handle RegistrationForm success event (backward compatibility)
