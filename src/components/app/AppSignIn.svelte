@@ -7,6 +7,7 @@ import { cleanInvitationUrl } from '../../utils/invitationHandler';
 import { 
   createAuthStore, 
   SignInForm,
+  RegistrationForm,
   isAuthenticatedFromSession,
   getCurrentUserFromSession,
   detectApiServer,
@@ -28,26 +29,16 @@ let authError = null;
 let invitationToken = null;
 let tokenData = null;
 let showRegistrationForm = false;
-let isSubmitting = false;
 let tokenValid = false;
 let signinEmail = '';
 let isAuthenticated = false;
 let currentUser = null;
 let isSigningIn = false;
+let apiBaseUrl = 'https://api.thepia.com'; // Default to production, will be updated in onMount
 
 // Session functions - now imported statically
 
-// Registration form data
-let registrationData = {
-  email: '',
-  firstName: '',
-  lastName: '',
-  company: '',
-  phone: '',
-  jobTitle: '',
-  acceptedTerms: false,
-  acceptedPrivacy: false,
-};
+// Registration form data - now handled by RegistrationForm component
 
 // API server detection function (imported statically)
 
@@ -86,7 +77,7 @@ onMount(async () => {
   try {
     // Detect available API server (local first, then production)
     const apiServerResult = await detectApiServer();
-    const apiBaseUrl = apiServerResult.url;
+    apiBaseUrl = apiServerResult.url;
     console.log('🔧 Using API server:', apiBaseUrl);
 
     // Configure storage with conservative defaults (security-first approach)
@@ -97,6 +88,7 @@ onMount(async () => {
     });
 
     console.log('🗄️ Storage configured with conservative defaults:', getStorageConfig());
+    console.log('🎨 Thepia branding colors:', thepiaColors);
 
     authStore = createAuthStore({
       apiBaseUrl: apiBaseUrl,
@@ -285,12 +277,8 @@ async function checkTokenAndUserStatus() {
       case 'complete_registration':
         // Pre-fill registration data from token
         if (result.registrationData) {
-          registrationData.email = result.registrationData.email;
-          registrationData.firstName = result.registrationData.firstName;
-          registrationData.lastName = result.registrationData.lastName;
-          registrationData.company = result.registrationData.company;
-          registrationData.phone = result.registrationData.phone;
-          registrationData.jobTitle = result.registrationData.jobTitle;
+          // Registration data is now handled by RegistrationForm component
+          // through the invitationTokenData prop
         }
         showRegistrationForm = true;
         authError = null;
@@ -331,85 +319,53 @@ function handleAuthError(event) {
   }, 5000);
 }
 
+// Handle RegistrationForm appAccess event (immediate app access after registration)
+function handleAppAccess(event) {
+  const { user } = event.detail;
+  console.log('Registration successful, granting app access:', user);
+
+  // Configure storage for employee experience (7-day sessions)
+  configureSessionStorage({
+    type: 'localStorage',
+    userRole: 'employee',
+    sessionTimeout: 7 * 24 * 60 * 60 * 1000, // 7 days
+    migrateExistingSession: true
+  });
+
+  // Clean invitation URL
+  if (invitationToken) {
+    cleanInvitationUrl();
+  }
+
+  // Update auth state for immediate app access
+  isAuthenticated = true;
+  currentUser = user;
+  authError = null;
+}
+
+// Handle RegistrationForm success event (backward compatibility)
+function handleRegistrationSuccess(event) {
+  const { user } = event.detail;
+  console.log('Registration completed successfully:', user);
+  // Additional success handling if needed
+}
+
+// Handle RegistrationForm error event
+function handleRegistrationError(event) {
+  const { error } = event.detail;
+  console.error('Registration error:', error);
+  authError = error.message || 'Registration failed. Please try again.';
+}
+
+// Handle switch to sign-in mode
+function handleSwitchToSignIn() {
+  showRegistrationForm = false;
+  signinEmail = tokenData?.email || '';
+  authError = null;
+}
+
 
 // Invitation token utilities are now imported from @thepia/flows-auth
-
-// Handle registration form submission
-async function handleRegistrationSubmit() {
-  // Validate required fields
-  if (!registrationData.email || !registrationData.firstName || !registrationData.lastName) {
-    authError = 'Please fill in all required fields';
-    return;
-  }
-
-  if (!registrationData.acceptedTerms || !registrationData.acceptedPrivacy) {
-    authError = 'You must accept the Terms of Service and Privacy Policy';
-    return;
-  }
-
-  // Validate that email matches token (security check)
-  if (tokenData.email && tokenData.email.toLowerCase() !== registrationData.email.toLowerCase()) {
-    authError = 'Email address must match the invitation token.';
-    return;
-  }
-
-  isSubmitting = true;
-  authError = null;
-
-  try {
-    // Create user profile with token metadata
-    const userProfile = {
-      email: registrationData.email,
-      given_name: registrationData.firstName,
-      family_name: registrationData.lastName,
-      name: `${registrationData.firstName} ${registrationData.lastName}`,
-      company: registrationData.company,
-      phone: registrationData.phone,
-      job_title: registrationData.jobTitle,
-      metadata: {
-        invitation_token: invitationToken,
-        invitation_data: tokenData,
-        registered_at: new Date().toISOString(),
-        source: 'invitation_link',
-        token_validated: true,
-      },
-    };
-
-    // Create account with passkey using the new comprehensive flow
-    const result = await authStore.createAccount({
-      email: registrationData.email,
-      firstName: registrationData.firstName,
-      lastName: registrationData.lastName,
-      acceptedTerms: registrationData.acceptedTerms,
-      acceptedPrivacy: registrationData.acceptedPrivacy,
-      invitationToken: invitationToken || undefined, // Pass invitation token for email verification
-    });
-
-    if (result.step === 'success' && result.user) {
-      // Registration successful - auth store now has the authenticated session
-      console.log('Registration successful:', result.user);
-      // The auth store subscription will detect the authenticated state and handle everything
-    }
-  } catch (error) {
-    console.error('Registration failed:', error);
-
-    // Handle specific error cases
-    if (error.message?.includes('User already exists')) {
-      authError = 'An account with this email already exists. Please sign in instead.';
-      switchToSignIn();
-    } else if (error.message?.includes('NotAllowedError')) {
-      authError =
-        'Passkey creation was cancelled. Please try again and allow the passkey creation when prompted.';
-    } else if (error.message?.includes('NotSupportedError')) {
-      authError =
-        'Passkey authentication is not supported on this device. Please use a device with biometric authentication.';
-    } else {
-      authError = error.message || 'Registration failed. Please try again.';
-    }
-  } finally {
-    isSubmitting = false;
-  }
-}
 
 // Switch to sign-in mode
 function switchToSignIn() {
@@ -438,8 +394,16 @@ async function handlePasskeySignIn() {
     console.log('🔍 DEMO: signInWithPasskey result:', result);
 
     if (result.step === 'success' && result.user) {
-      // Sign-in successful - will auto-redirect via auth state subscription
+      // Sign-in successful - configure storage for employee experience
       console.log('Passkey sign-in successful:', result.user);
+      
+      // Configure storage for employee experience (7-day sessions)
+      configureSessionStorage({
+        type: 'localStorage',
+        userRole: 'employee',
+        sessionTimeout: 7 * 24 * 60 * 60 * 1000, // 7 days
+        migrateExistingSession: true
+      });
     }
   } catch (error) {
     console.error('Passkey sign-in failed:', error);
@@ -475,7 +439,7 @@ async function handlePasskeySignIn() {
 </script>
 
 <!-- Full-screen App Container -->
-<div class="app-container">
+<div class="app-container" style="--thepia-primary: {thepiaColors.primary}; --thepia-primary-600: {thepiaColors.primaryDark}; --thepia-secondary: {thepiaColors.secondary}; --brand-primary: {thepiaColors.primary}; --brand-primary-dark: {thepiaColors.primaryDark}">
   <!-- Background Pattern -->
   <div class="background-pattern"></div>
   
@@ -493,7 +457,7 @@ async function handlePasskeySignIn() {
     </div>
 
     <!-- Auth Container -->
-    <div class="auth-container">
+    <div class="auth-section">
       {#if authError}
         <!-- Error Message -->
         <div class="error-banner">
@@ -573,145 +537,35 @@ async function handlePasskeySignIn() {
           </div>
           <p class="determining-text">Checking invitation details...</p>
         </div>
-      {:else if showRegistrationForm && tokenData}
-        <!-- Registration Form with Token Data -->
-        <div class="registration-container">
-          <h2 class="registration-title">
-            {#if authStore && tokenData?.email}
-              {#await authStore.checkUser(tokenData.email) then userCheck}
-                {userCheck.exists ? 'Complete Your Passkey Setup' : 'Complete Your Registration'}
-              {:catch}
-                Complete Your Registration
-              {/await}
-            {:else}
-              Complete Your Registration
-            {/if}
-          </h2>
-          <p class="registration-subtitle">
-            {#if authStore && tokenData?.email}
-              {#await authStore.checkUser(tokenData.email) then userCheck}
-                {userCheck.exists ? 
-                  'Your account exists but needs a passkey for secure access. Please create your passkey below.' : 
-                  'We have some information from your invitation. Please review and complete your profile.'
-                }
-              {:catch}
-                We have some information from your invitation. Please review and complete your profile.
-              {/await}
-            {:else}
-              We have some information from your invitation. Please review and complete your profile.
-            {/if}
-          </p>
-          
-          {#if tokenData.expires && tokenData.expires < new Date()}
-            <div class="warning-banner">
-              <svg class="warning-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3l-7.732-13.5c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-              </svg>
-              <span>This invitation has expired. You can still register, but some features may be limited.</span>
-            </div>
-          {/if}
-          
-          <form on:submit|preventDefault={handleRegistrationSubmit}>
-            <div class="form-grid">
-              <div class="form-field">
-                <label for="email">Email Address <span class="required">*</span></label>
-                <input
-                  id="email"
-                  type="email"
-                  bind:value={registrationData.email}
-                  required
-                  readonly={!!tokenData.email}
-                  class:readonly={!!tokenData.email}
-                />
-              </div>
-              
-              <div class="form-field">
-                <label for="firstName">First Name <span class="required">*</span></label>
-                <input
-                  id="firstName"
-                  type="text"
-                  bind:value={registrationData.firstName}
-                  required
-                />
-              </div>
-              
-              <div class="form-field">
-                <label for="lastName">Last Name <span class="required">*</span></label>
-                <input
-                  id="lastName"
-                  type="text"
-                  bind:value={registrationData.lastName}
-                  required
-                />
-              </div>
-              
-              <div class="form-field">
-                <label for="company">Company</label>
-                <input
-                  id="company"
-                  type="text"
-                  bind:value={registrationData.company}
-                />
-              </div>
-              
-              <div class="form-field">
-                <label for="phone">Phone Number</label>
-                <input
-                  id="phone"
-                  type="tel"
-                  bind:value={registrationData.phone}
-                />
-              </div>
-              
-              <div class="form-field">
-                <label for="jobTitle">Job Title</label>
-                <input
-                  id="jobTitle"
-                  type="text"
-                  bind:value={registrationData.jobTitle}
-                />
-              </div>
-            </div>
-            
-            <div class="terms-container">
-              <label class="checkbox-label">
-                <input
-                  type="checkbox"
-                  bind:checked={registrationData.acceptedTerms}
-                  required
-                />
-                <span>I agree to the <a href="/terms" target="_blank">Terms of Service</a> <span class="required">*</span></span>
-              </label>
-              
-              <label class="checkbox-label">
-                <input
-                  type="checkbox"
-                  bind:checked={registrationData.acceptedPrivacy}
-                  required
-                />
-                <span>I agree to the <a href="/privacy" target="_blank">Privacy Policy</a> <span class="required">*</span></span>
-              </label>
-            </div>
-            
-            <button 
-              type="submit" 
-              class="submit-button"
-              disabled={isSubmitting || !registrationData.acceptedTerms || !registrationData.acceptedPrivacy}
-            >
-              {#if isSubmitting}
-                <span class="loading-spinner"></span>
-                Creating Account...
-              {:else}
-                🔑 Create Account with Passkey
-              {/if}
-            </button>
-          </form>
-          
-          <div class="form-footer">
-            <p>Already have an account? <button on:click={switchToSignIn} class="link-button">Sign in instead</button></p>
-          </div>
-        </div>
+      {:else if showRegistrationForm && tokenData && authStore && authLoaded}
+        <!-- Registration Form with flows-auth RegistrationForm -->
+        <RegistrationForm 
+            config={{
+              apiBaseUrl: apiBaseUrl,
+              clientId: 'thepia-flows-app',
+              domain: 'thepia.net',
+              enablePasskeys: true,
+              enableMagicLinks: true,
+              enableSocialLogin: false,
+              enablePasswordLogin: false,
+              branding: {
+                companyName: 'Thepia',
+                logoUrl: '/logo.svg',
+                primaryColor: thepiaColors.primary,
+                showPoweredBy: false
+              }
+            }}
+            additionalFields={['company', 'phone', 'jobTitle']}
+            invitationTokenData={tokenData}
+            readOnlyFields={tokenData?.email ? ['email'] : []}
+            initialEmail={tokenData?.email || ''}
+            onSwitchToSignIn={handleSwitchToSignIn}
+            showLogo={false}
+            compact={false}
+            on:appAccess={handleAppAccess}
+            on:success={handleRegistrationSuccess}
+            on:error={handleRegistrationError}
+          />
       {:else if authLoaded && !isAuthenticated && !showRegistrationForm}
         <!-- Regular Passkey Sign In -->
         <div class="signin-container">
@@ -794,6 +648,15 @@ async function handlePasskeySignIn() {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   }
 
+  /* Auth container styling - only for login form, not registration form */
+  .signin-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    padding: 32px 32px;
+  }
+
   .background-pattern {
     position: absolute;
     top: 0;
@@ -869,15 +732,6 @@ async function handlePasskeySignIn() {
     margin: 0;
   }
 
-  .auth-container {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 
-      0 20px 25px -5px rgba(0, 0, 0, 0.1),
-      0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    overflow: hidden;
-    margin-bottom: 24px;
-  }
 
   .error-banner {
     background: #fee2e2;
@@ -1026,9 +880,6 @@ async function handlePasskeySignIn() {
       font-size: 14px;
     }
 
-    .auth-container {
-      border-radius: 12px;
-    }
 
     .app-footer {
       font-size: 12px;
@@ -1345,12 +1196,6 @@ async function handlePasskeySignIn() {
       color: #a0aec0;
     }
 
-    .auth-container {
-      background: #2d3748;
-      box-shadow: 
-        0 20px 25px -5px rgba(0, 0, 0, 0.4),
-        0 10px 10px -5px rgba(0, 0, 0, 0.2);
-    }
 
     .error-banner {
       background: #742a2a;

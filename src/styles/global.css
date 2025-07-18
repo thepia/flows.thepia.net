@@ -3,6 +3,9 @@
 /* Import Thepia Branding Package Tokens - v1.1.0+ */
 @import "@thepia/branding/tailwind/variables";
 
+/* Import flows-auth component styles */
+@import "@thepia/flows-auth/dist/style.css";
+
 /* Enable class-based dark mode */
 @variant dark (&:where(.dark, .dark *));
 
