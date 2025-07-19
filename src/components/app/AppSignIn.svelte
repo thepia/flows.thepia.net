@@ -176,38 +176,16 @@ onMount(async () => {
         const userRole = $auth.user.metadata?.role;
         console.log('🔍 User authenticated with role:', userRole);
         
+        // Note: Storage configuration should be handled by the auth store itself
+        // during the registration/authentication process. We don't need to manually
+        // upgrade storage here since the auth store manages session persistence.
+        
         if (userRole === 'employee') {
-          try {
-            console.log('🔄 Upgrading to employee storage configuration...');
-            await authStore.updateStorageConfiguration({
-              type: 'localStorage',
-              userRole: 'employee',
-              sessionTimeout: 7 * 24 * 60 * 60 * 1000, // 7 days
-              migrateExistingSession: true,
-              preserveTokens: true
-            });
-            console.log('✅ Successfully upgraded to employee storage');
-          } catch (error) {
-            console.warn('⚠️ Failed to upgrade storage configuration:', error);
-            // Continue with guest configuration - authentication is still valid
-          }
+          console.log('👨‍💼 Employee user authenticated - auth store should have configured appropriate storage');
         } else if (userRole === 'admin') {
-          try {
-            console.log('🔄 Upgrading to admin storage configuration...');
-            await authStore.updateStorageConfiguration({
-              type: 'localStorage',
-              userRole: 'admin',
-              sessionTimeout: 7 * 24 * 60 * 60 * 1000, // 7 days
-              migrateExistingSession: true,
-              preserveTokens: true
-            });
-            console.log('✅ Successfully upgraded to admin storage');
-          } catch (error) {
-            console.warn('⚠️ Failed to upgrade storage configuration:', error);
-            // Continue with guest configuration - authentication is still valid
-          }
+          console.log('👨‍💻 Admin user authenticated - auth store should have configured appropriate storage');
         } else {
-          console.log('📊 User authenticated as guest, keeping conservative storage defaults');
+          console.log('👤 Guest user authenticated - using conservative storage defaults');
         }
       }
 
@@ -322,30 +300,26 @@ function handleAuthError(event) {
 // Handle RegistrationForm appAccess event (immediate app access after registration)
 function handleAppAccess(event) {
   const { user, autoSignIn, emailVerifiedViaInvitation } = event.detail;
-  console.log('Registration successful, granting app access:', { user, autoSignIn, emailVerifiedViaInvitation });
-
-  // Configure storage for employee experience (7-day sessions)
-  configureSessionStorage({
-    type: 'localStorage',
-    userRole: 'employee',
-    sessionTimeout: 7 * 24 * 60 * 60 * 1000, // 7 days
-    migrateExistingSession: true
+  console.log('📱 RegistrationForm appAccess event received - auth store should have already persisted session:', { 
+    user: user?.email, 
+    autoSignIn, 
+    emailVerifiedViaInvitation 
   });
 
-  // Clean invitation URL
+  // Clean invitation URL since registration is complete
   if (invitationToken) {
     cleanInvitationUrl();
+    console.log('🔗 Invitation URL cleaned up after registration completion');
   }
 
   // Close the registration form dialog
   showRegistrationForm = false;
   
-  // Update auth state for immediate app access
-  isAuthenticated = true;
-  currentUser = user;
-  authError = null;
+  // Note: We no longer manually set isAuthenticated/currentUser here
+  // The auth store subscription (lines 150-219) will handle state updates
+  // based on the session that was persisted by the auth store during registration
   
-  console.log('✅ Registration dialog closed, demo app should now be visible');
+  console.log('✅ Registration dialog closed - auth store subscription will update state from persisted session');
 }
 
 // Handle RegistrationForm success event (backward compatibility)
@@ -399,16 +373,9 @@ async function handlePasskeySignIn() {
     console.log('🔍 DEMO: signInWithPasskey result:', result);
 
     if (result.step === 'success' && result.user) {
-      // Sign-in successful - configure storage for employee experience
-      console.log('Passkey sign-in successful:', result.user);
-      
-      // Configure storage for employee experience (7-day sessions)
-      configureSessionStorage({
-        type: 'localStorage',
-        userRole: 'employee',
-        sessionTimeout: 7 * 24 * 60 * 60 * 1000, // 7 days
-        migrateExistingSession: true
-      });
+      // Sign-in successful - auth store handles session persistence
+      console.log('✅ Passkey sign-in successful:', result.user?.email);
+      console.log('🔍 Auth store will handle session persistence and storage configuration');
     }
   } catch (error) {
     console.error('Passkey sign-in failed:', error);
