@@ -7,7 +7,7 @@ import { cleanInvitationUrl } from '../../utils/invitationHandler';
 import { 
   createAuthStore, 
   SignInForm,
-  RegistrationForm,
+  AccountCreationForm,
   isAuthenticatedFromSession,
   getCurrentUserFromSession,
   detectApiServer,
@@ -28,7 +28,7 @@ let determiningMode = false;
 let authError = null;
 let invitationToken = null;
 let tokenData = null;
-let showRegistrationForm = false;
+let showAccountCreationForm = false;
 let tokenValid = false;
 let signinEmail = '';
 let isAuthenticated = false;
@@ -38,7 +38,7 @@ let apiBaseUrl = 'https://api.thepia.com'; // Default to production, will be upd
 
 // Session functions - now imported statically
 
-// Registration form data - now handled by RegistrationForm component
+// Account creation form data - now handled by AccountCreationForm component
 
 // API server detection function (imported statically)
 
@@ -247,7 +247,7 @@ async function checkTokenAndUserStatus() {
     // Handle result based on recommended action
     switch (result.action) {
       case 'signin':
-        showRegistrationForm = false;
+        showAccountCreationForm = false;
         authError = null;
         break;
         
@@ -255,22 +255,22 @@ async function checkTokenAndUserStatus() {
       case 'complete_registration':
         // Pre-fill registration data from token
         if (result.registrationData) {
-          // Registration data is now handled by RegistrationForm component
+          // Registration data is now handled by AccountCreationForm component
           // through the invitationTokenData prop
         }
-        showRegistrationForm = true;
+        showAccountCreationForm = true;
         authError = null;
         break;
         
       case 'error':
         authError = result.error || 'Unable to verify invitation. Please try again or contact support.';
-        showRegistrationForm = false;
+        showAccountCreationForm = false;
         break;
     }
   } catch (error) {
     console.error('Failed to check user status:', error);
     authError = 'Unable to verify invitation. Please try again or contact support.';
-    showRegistrationForm = false;
+    showAccountCreationForm = false;
   }
 }
 
@@ -297,13 +297,13 @@ function handleAuthError(event) {
   }, 5000);
 }
 
-// Handle RegistrationForm appAccess event (immediate app access after registration)
+// Handle AccountCreationForm appAccess event (immediate app access after registration)
 function handleAppAccess(event) {
   const { user, autoSignIn, emailVerifiedViaInvitation } = event.detail;
-  console.log('📱 RegistrationForm appAccess event received - auth store should have already persisted session:', { 
-    user: user?.email, 
-    autoSignIn, 
-    emailVerifiedViaInvitation 
+  console.log('📱 AccountCreationForm appAccess event received - redirecting to DemoApp:', {
+    user: user?.email,
+    autoSignIn,
+    emailVerifiedViaInvitation
   });
 
   // Clean invitation URL since registration is complete
@@ -313,23 +313,35 @@ function handleAppAccess(event) {
   }
 
   // Close the registration form dialog
-  showRegistrationForm = false;
-  
-  // Note: We no longer manually set isAuthenticated/currentUser here
-  // The auth store subscription (lines 150-219) will handle state updates
-  // based on the session that was persisted by the auth store during registration
-  
-  console.log('✅ Registration dialog closed - auth store subscription will update state from persisted session');
+  showAccountCreationForm = false;
+
+  // Redirect to DemoApp immediately - don't wait for auth store subscription
+  console.log('🎯 Redirecting to /app after successful account creation');
+  window.location.href = '/app';
 }
 
-// Handle RegistrationForm success event (backward compatibility)
+// Handle AccountCreationForm success event - show DemoApp immediately
 function handleRegistrationSuccess(event) {
   const { user } = event.detail;
-  console.log('Registration completed successfully:', user);
-  // Additional success handling if needed
+  console.log('🎯 SUCCESS EVENT RECEIVED - showing DemoApp:', user);
+
+  // Clean invitation URL since registration is complete
+  if (invitationToken) {
+    cleanInvitationUrl();
+    console.log('🔗 Invitation URL cleaned up after registration completion');
+  }
+
+  // Close the registration form dialog
+  showAccountCreationForm = false;
+
+  // Update auth state to show DemoApp
+  isAuthenticated = true;
+  currentUser = user;
+
+  console.log('🎯 DemoApp should now be visible');
 }
 
-// Handle RegistrationForm error event
+// Handle AccountCreationForm error event
 function handleRegistrationError(event) {
   const { error } = event.detail;
   console.error('Registration error:', error);
@@ -338,7 +350,7 @@ function handleRegistrationError(event) {
 
 // Handle switch to sign-in mode
 function handleSwitchToSignIn() {
-  showRegistrationForm = false;
+  showAccountCreationForm = false;
   signinEmail = tokenData?.email || '';
   authError = null;
 }
@@ -348,7 +360,7 @@ function handleSwitchToSignIn() {
 
 // Switch to sign-in mode
 function switchToSignIn() {
-  showRegistrationForm = false;
+  showAccountCreationForm = false;
   authError = null;
 }
 
@@ -416,7 +428,7 @@ async function handlePasskeySignIn() {
   <div class="background-pattern"></div>
   
   <!-- Main Content -->
-  <div class="content" class:registration-mode={showRegistrationForm}>
+  <div class="content" class:registration-mode={showAccountCreationForm}>
     <!-- Logo and Title -->
     <div class="app-header">
       <div class="brand-lockup">
@@ -509,9 +521,9 @@ async function handlePasskeySignIn() {
           </div>
           <p class="determining-text">Checking invitation details...</p>
         </div>
-      {:else if showRegistrationForm && tokenData && authStore && authLoaded}
-        <!-- Registration Form with flows-auth RegistrationForm -->
-        <RegistrationForm 
+      {:else if showAccountCreationForm && tokenData && authStore && authLoaded}
+        <!-- Account Creation Form with flows-auth AccountCreationForm -->
+        <AccountCreationForm
             config={{
               apiBaseUrl: apiBaseUrl,
               clientId: 'thepia-flows-app',
@@ -529,7 +541,14 @@ async function handlePasskeySignIn() {
             }}
             additionalFields={['company', 'phone', 'jobTitle']}
             invitationTokenData={tokenData}
-            readOnlyFields={tokenData?.email ? ['email'] : []}
+            readOnlyFields={tokenData ? [
+              ...(tokenData.email ? ['email'] : []),
+              ...(tokenData.firstName ? ['firstName'] : []),
+              ...(tokenData.lastName ? ['lastName'] : []),
+              ...(tokenData.company ? ['company'] : []),
+              ...(tokenData.phone ? ['phone'] : []),
+              ...(tokenData.jobTitle ? ['jobTitle'] : [])
+            ] : []}
             initialEmail={tokenData?.email || ''}
             onSwitchToSignIn={handleSwitchToSignIn}
             showLogo={false}
@@ -538,7 +557,7 @@ async function handlePasskeySignIn() {
             on:success={handleRegistrationSuccess}
             on:error={handleRegistrationError}
           />
-      {:else if authLoaded && !isAuthenticated && !showRegistrationForm}
+      {:else if authLoaded && !isAuthenticated && !showAccountCreationForm}
         <!-- Regular Passkey Sign In -->
         <div class="signin-container">
           <h2 class="signin-title">Sign In</h2>
@@ -598,7 +617,7 @@ async function handlePasskeySignIn() {
     <!-- Footer Links -->
     <div class="app-footer">
       <a href="/" class="footer-link">← Back to Home</a>
-      {#if !showRegistrationForm}
+      {#if !showAccountCreationForm}
         <span class="footer-divider">•</span>
         <button class="footer-link" disabled={isAuthenticated}>
           Try Demo
