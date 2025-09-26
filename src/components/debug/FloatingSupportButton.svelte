@@ -1,6 +1,6 @@
 <script>
 import { thepiaColors } from '@thepia/branding';
-import { Activity, AlertCircle, CheckCircle2, XCircle } from 'lucide-svelte';
+import { Activity, Warning, CheckCircle, XCircle } from 'phosphor-svelte';
 import { onDestroy, onMount } from 'svelte';
 
 let showPopover = false;

@@ -5,7 +5,7 @@ import { writable } from 'svelte/store';
 // Browser detection for Astro
 const browser = typeof window !== 'undefined';
 import { thepiaColors } from '@thepia/branding';
-import { Menu, X, Settings, LogOut, User, Building2, ChevronLeft, ChevronRight } from 'lucide-svelte';
+import { List, X, Gear, SignOut, User, Buildings, CaretLeft, CaretRight } from 'phosphor-svelte';
 import { cn } from '../../utils';
 import Button from '../ui/button/button.svelte';
 import Card from '../ui/card/card.svelte';
@@ -188,9 +188,9 @@ function getClientStatusBadge(status: string) {
           class="p-2"
         >
           {#if $sidebarCollapsed}
-            <ChevronRight class="w-4 h-4" />
+            <CaretRight class="w-4 h-4" />
           {:else}
-            <ChevronLeft class="w-4 h-4" />
+            <CaretLeft class="w-4 h-4" />
           {/if}
         </Button>
       </div>
@@ -281,7 +281,7 @@ function getClientStatusBadge(status: string) {
             on:click={handleSignOut}
             class="flex-1 justify-start gap-2"
           >
-            <LogOut class="w-4 h-4" />
+            <SignOut class="w-4 h-4" />
             Sign Out
           </Button>
         </div>
@@ -296,7 +296,7 @@ function getClientStatusBadge(status: string) {
             on:click={handleSignOut}
             class="p-2"
           >
-            <LogOut class="w-4 h-4" />
+            <SignOut class="w-4 h-4" />
           </Button>
         </div>
       {/if}
@@ -319,7 +319,7 @@ function getClientStatusBadge(status: string) {
             on:click={toggleMobileMenu}
             class="p-2"
           >
-            <Menu class="w-4 h-4" />
+            <List class="w-4 h-4" />
           </Button>
         </div>
 
@@ -334,13 +334,13 @@ function getClientStatusBadge(status: string) {
         <div class="flex items-center gap-3">
           {#if currentClient}
             <div class="hidden sm:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <Building2 class="w-4 h-4" />
+              <Buildings class="w-4 h-4" />
               <span>{currentClient.name}</span>
             </div>
           {/if}
           
           <Button variant="ghost" size="sm" class="p-2">
-            <Settings class="w-4 h-4" />
+            <Gear class="w-4 h-4" />
           </Button>
         </div>
       </div>

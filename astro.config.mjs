@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import svelte from '@astrojs/svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { getHttpsConfig, getServerConfig } from './scripts/dev-server.mjs';
+import { resolve } from 'path';
 // import ThepiaBrandingPlugin from '@thepia/branding/astro/ThepiaBrandingPlugin.mjs';
 
 // https://astro.build/config
@@ -27,6 +28,13 @@ export default defineConfig({
     plugins: [tailwindcss()],
     define: {
       __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
+    },
+    resolve: {
+      alias: {
+        // Fix paraglide messages resolution for flows-auth development
+        '../paraglide/messages': resolve('../flows-auth/src/paraglide/messages'),
+        '../../paraglide/messages': resolve('../flows-auth/src/paraglide/messages'),
+      },
     },
     server: {
       https: getHttpsConfig(),
