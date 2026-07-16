@@ -1,35 +1,39 @@
 <script lang="ts">
+import { thepiaColors } from '@thepia/branding';
 import { onMount } from 'svelte';
 import { writable } from 'svelte/store';
-import { thepiaColors } from '@thepia/branding';
-import Card from '../ui/card/card.svelte';
+import { reportSupabaseError } from '../../config/errorReporting.js';
+import Badge from '../ui/badge/badge.svelte';
+import Button from '../ui/button/button.svelte';
 import CardContent from '../ui/card/card-content.svelte';
 import CardDescription from '../ui/card/card-description.svelte';
 import CardHeader from '../ui/card/card-header.svelte';
 import CardTitle from '../ui/card/card-title.svelte';
-import Button from '../ui/button/button.svelte';
-import Badge from '../ui/badge/badge.svelte';
+import Card from '../ui/card/card.svelte';
 import AppLayout from './AppLayout.svelte';
-import { reportSupabaseError } from '../../config/errorReporting.js';
 
-export let currentUser: any;
-export let invitationToken: string | null = null;
+interface Props {
+  currentUser: any;
+  invitationToken?: string | null;
+}
+
+let { currentUser, invitationToken = null }: Props = $props();
 
 // App state
-let loading = false;
-let error: string | null = null;
-let clientId: string = '';
-let userRole: 'admin' | 'manager' | 'employee' = 'employee';
+let loading = $state(false);
+let error: string | null = $state(null);
+let clientId: string = $state('');
+let userRole: 'admin' | 'manager' | 'employee' = $state('employee');
 
 // Demo data
-let dashboardStats = {
+let dashboardStats = $state({
   totalTasks: 0,
   activeTasks: 0,
   completedTasks: 0,
   totalPeople: 0,
-};
+});
 
-let recentTasks = [];
+let recentTasks = $state([]);
 let recentActivity = [];
 
 // Determine user role and client ID
@@ -43,7 +47,7 @@ onMount(async () => {
     // For demo purposes, we'll use a fixed client ID
     // In production, this would come from user permissions/organization
     clientId = 'demo-client-001';
-    
+
     // Determine user role based on email domain or other criteria
     // This is a simplified demo implementation
     if (currentUser.email.includes('admin')) {
@@ -55,13 +59,13 @@ onMount(async () => {
     }
 
     console.log('User role determined:', userRole, 'for client:', clientId);
-    
+
     // Load dashboard data
     await loadDashboardData();
   } catch (err) {
     console.error('Error initializing app:', err);
     error = err.message || 'Failed to initialize application';
-    
+
     await reportSupabaseError('app', 'init_app', err, {
       operation: 'initializeApp',
       component: 'MainApp',
@@ -86,7 +90,7 @@ async function loadDashboardData() {
       .order('created_at', { ascending: false })
       .limit(10);
 
-    let tasks;
+    let tasks: typeof tasksData;
     if (tasksError) {
       console.warn('Tasks query failed:', tasksError);
       // Use demo data if database query fails
@@ -98,15 +102,16 @@ async function loadDashboardData() {
     // Calculate stats
     dashboardStats = {
       totalTasks: tasks?.length || 0,
-      activeTasks: tasks?.filter(t => t.status === 'in_progress' || t.status === 'assigned').length || 0,
-      completedTasks: tasks?.filter(t => t.status === 'completed').length || 0,
+      activeTasks:
+        tasks?.filter((t) => t.status === 'in_progress' || t.status === 'assigned').length || 0,
+      completedTasks: tasks?.filter((t) => t.status === 'completed').length || 0,
       totalPeople: 12, // Demo value
     };
 
     recentTasks = tasks?.slice(0, 5) || [];
-    
+
     // Create recent activity from tasks
-    recentActivity = recentTasks.map(task => ({
+    recentActivity = recentTasks.map((task) => ({
       id: task.id,
       type: 'task',
       title: task.title,
@@ -126,11 +131,41 @@ async function loadDashboardData() {
 // Get demo tasks data
 function getDemoTasks() {
   return [
-    { id: '1', title: 'Schedule Technical Interview', status: 'in_progress', created_at: new Date().toISOString(), assignee_email: 'interviewer@company.com' },
-    { id: '2', title: 'Review Application Portfolio', status: 'completed', created_at: new Date(Date.now() - 3600000).toISOString(), assignee_email: 'manager@company.com' },
-    { id: '3', title: 'Prepare Interview Questions', status: 'assigned', created_at: new Date(Date.now() - 7200000).toISOString(), assignee_email: 'hr@company.com' },
-    { id: '4', title: 'Reference Check', status: 'in_progress', created_at: new Date(Date.now() - 10800000).toISOString(), assignee_email: 'recruiter@company.com' },
-    { id: '5', title: 'Onboarding Preparation', status: 'assigned', created_at: new Date(Date.now() - 14400000).toISOString(), assignee_email: 'hr@company.com' },
+    {
+      id: '1',
+      title: 'Schedule Technical Interview',
+      status: 'in_progress',
+      created_at: new Date().toISOString(),
+      assignee_email: 'interviewer@company.com',
+    },
+    {
+      id: '2',
+      title: 'Review Application Portfolio',
+      status: 'completed',
+      created_at: new Date(Date.now() - 3600000).toISOString(),
+      assignee_email: 'manager@company.com',
+    },
+    {
+      id: '3',
+      title: 'Prepare Interview Questions',
+      status: 'assigned',
+      created_at: new Date(Date.now() - 7200000).toISOString(),
+      assignee_email: 'hr@company.com',
+    },
+    {
+      id: '4',
+      title: 'Reference Check',
+      status: 'in_progress',
+      created_at: new Date(Date.now() - 10800000).toISOString(),
+      assignee_email: 'recruiter@company.com',
+    },
+    {
+      id: '5',
+      title: 'Onboarding Preparation',
+      status: 'assigned',
+      created_at: new Date(Date.now() - 14400000).toISOString(),
+      assignee_email: 'hr@company.com',
+    },
   ];
 }
 
@@ -138,7 +173,7 @@ function getDemoTasks() {
 function handleSignOut() {
   // Clear any local data
   localStorage.removeItem('demo_client_id');
-  
+
   // Dispatch sign out event
   const event = new CustomEvent('signOut');
   window.dispatchEvent(event);

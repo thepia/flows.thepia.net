@@ -1,10 +1,12 @@
 <script>
+import { preventDefault } from 'svelte/legacy';
+
 import { signInWithMagicLink } from '../../stores/auth.ts';
 
-let email = '';
-let _loading = false;
-let _message = '';
-let _error = '';
+let email = $state('');
+let _loading = $state(false);
+let _message = $state('');
+let _error = $state('');
 
 async function handleLogin() {
   if (!email) return;
@@ -35,7 +37,7 @@ async function handleLogin() {
     </p>
   </div>
   
-  <form on:submit|preventDefault={handleLogin} class="space-y-6">
+  <form onsubmit={preventDefault(handleLogin)} class="space-y-6">
     <div>
       <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         Email Address

@@ -1,13 +1,19 @@
 <script lang="ts">
 import { cn } from '../../../utils';
 
-export let orientation: 'horizontal' | 'vertical' = 'horizontal';
-export let className: string = '';
+interface Props {
+  orientation?: 'horizontal' | 'vertical';
+  className?: string;
+}
 
-$: classes = cn(
-  'shrink-0 bg-border',
-  orientation === 'horizontal' ? 'h-[1px] w-full' : 'h-full w-[1px]',
-  className
+let { orientation = 'horizontal', className = '' }: Props = $props();
+
+let classes = $derived(
+  cn(
+    'shrink-0 bg-border',
+    orientation === 'horizontal' ? 'h-[1px] w-full' : 'h-full w-[1px]',
+    className
+  )
 );
 </script>
 

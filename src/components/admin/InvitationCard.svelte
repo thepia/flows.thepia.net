@@ -2,8 +2,12 @@
 import { createEventDispatcher } from 'svelte';
 import { checkEmailService, sendInvitationEmail } from '../../lib/utils/emailSender';
 
-export let invitation: any;
-export let inviteData: any;
+interface Props {
+  invitation: any;
+  inviteData: any;
+}
+
+let { invitation, inviteData }: Props = $props();
 
 // Detect environment and build appropriate URL
 const isDev = import.meta.env.DEV;
@@ -17,9 +21,9 @@ const dispatch = createEventDispatcher<{
   emailSent: { invitation: any; result: any };
 }>();
 
-let sendingEmail = false;
-let emailError: string | null = null;
-let emailSuccess: string | null = null;
+let sendingEmail = $state(false);
+let emailError: string | null = $state(null);
+let emailSuccess: string | null = $state(null);
 
 function getStatusBadgeClass(status: string) {
   const baseClass = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
@@ -169,7 +173,7 @@ function getNotificationStatusBadgeClass(notificationStatus: string) {
               {baseUrl}{demoPath}?token={invitation.jwt_token}
             </a>
             <button
-              on:click={() => navigator.clipboard.writeText(`${baseUrl}${demoPath}?token=${invitation.jwt_token}`)}
+              onclick={() => navigator.clipboard.writeText(`${baseUrl}${demoPath}?token=${invitation.jwt_token}`)}
               class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               title="Copy link to clipboard"
             >
@@ -249,13 +253,13 @@ function getNotificationStatusBadgeClass(notificationStatus: string) {
       <!-- Approval/Rejection Actions for requested/pending invitations -->
       {#if ['requested', 'pending'].includes(invitation.status)}
         <button
-          on:click={() => dispatch('approve', { invitation })}
+          onclick={() => dispatch('approve', { invitation })}
           class="px-3 py-1 text-sm font-medium text-green-700 bg-green-100 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-300 dark:hover:bg-green-900/40 rounded-md transition-colors"
         >
           Approve
         </button>
         <button
-          on:click={() => dispatch('reject', { invitation })}
+          onclick={() => dispatch('reject', { invitation })}
           class="px-3 py-1 text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/40 rounded-md transition-colors"
         >
           Reject
@@ -265,7 +269,7 @@ function getNotificationStatusBadgeClass(notificationStatus: string) {
       <!-- Email Actions for approved invitations -->
       {#if invitation.status === 'approved' && invitation.jwt_token}
         <button
-          on:click={handleSendEmail}
+          onclick={handleSendEmail}
           disabled={sendingEmail}
           class="px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/40 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -276,7 +280,7 @@ function getNotificationStatusBadgeClass(notificationStatus: string) {
       <!-- Resend Email for sent invitations -->
       {#if invitation.status === 'sent' && invitation.jwt_token}
         <button
-          on:click={handleSendEmail}
+          onclick={handleSendEmail}
           disabled={sendingEmail}
           class="px-3 py-1 text-sm font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:hover:bg-purple-900/40 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -287,7 +291,7 @@ function getNotificationStatusBadgeClass(notificationStatus: string) {
       <!-- Legacy status change actions -->
       {#if invitation.status === 'pending'}
         <button
-          on:click={() => dispatch('updateStatus', { id: invitation.id, status: 'sent' })}
+          onclick={() => dispatch('updateStatus', { id: invitation.id, status: 'sent' })}
           class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
         >
           Mark Sent
@@ -296,7 +300,7 @@ function getNotificationStatusBadgeClass(notificationStatus: string) {
       
       {#if invitation.status !== 'expired' && invitation.status !== 'used'}
         <button
-          on:click={() => dispatch('updateStatus', { id: invitation.id, status: 'expired' })}
+          onclick={() => dispatch('updateStatus', { id: invitation.id, status: 'expired' })}
           class="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
         >
           Expire

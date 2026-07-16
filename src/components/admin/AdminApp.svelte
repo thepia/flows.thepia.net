@@ -4,7 +4,7 @@ import InvitationsViewSimple from './InvitationsViewSimple.svelte';
 import LoginForm from './LoginForm.svelte';
 import TestInvitationFlow from './TestInvitationFlow.svelte';
 
-let _showUserMenu = false;
+let _showUserMenu = $state(false);
 
 function handleSignOut() {
   signOut();
@@ -43,7 +43,7 @@ function handleSignOut() {
       </p>
       
       <button
-        on:click={handleSignOut}
+        onclick={handleSignOut}
         class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
       >
         Sign Out
@@ -68,7 +68,7 @@ function handleSignOut() {
           <div class="flex items-center">
             <div class="relative">
               <button
-                on:click={() => _showUserMenu = !_showUserMenu}
+                onclick={() => _showUserMenu = !_showUserMenu}
                 class="flex items-center text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <span class="mr-2">{$user.email}</span>
@@ -80,7 +80,7 @@ function handleSignOut() {
               {#if _showUserMenu}
                 <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10">
                   <button
-                    on:click={handleSignOut}
+                    onclick={handleSignOut}
                     class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Sign Out
@@ -114,7 +114,7 @@ function handleSignOut() {
     class="fixed inset-0 z-0" 
     role="button"
     tabindex="-1"
-    on:click={() => _showUserMenu = false}
-    on:keydown={(e) => e.key === 'Escape' && (_showUserMenu = false)}
+    onclick={() => _showUserMenu = false}
+    onkeydown={(e) => e.key === 'Escape' && (_showUserMenu = false)}
   ></div>
 {/if}

@@ -1,11 +1,16 @@
 <script lang="ts">
 import { cn } from '../../../utils';
 
-export let className: string = '';
+interface Props {
+  className?: string;
+  children?: import('svelte').Snippet;
+}
 
-$: classes = cn('text-2xl font-semibold leading-none tracking-tight', className);
+let { className = '', children }: Props = $props();
+
+let classes = $derived(cn('text-2xl font-semibold leading-none tracking-tight', className));
 </script>
 
 <h3 class={classes}>
-  <slot />
+  {@render children?.()}
 </h3>

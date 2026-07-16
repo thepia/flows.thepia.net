@@ -1,19 +1,31 @@
 <script lang="ts">
+import { run } from 'svelte/legacy';
+
 import { createEventDispatcher } from 'svelte';
 
-export let tabs: Array<{ id: string; name: string; badge?: boolean }> = [];
-export let activeFilter = '';
-export let getFilterCount: (filterId: string) => number;
-export let invitations: any[] = []; // Add this to trigger reactivity
-export let refreshing = false;
+interface Props {
+  tabs?: Array<{ id: string; name: string; badge?: boolean }>;
+  activeFilter?: string;
+  getFilterCount: (filterId: string) => number;
+  invitations?: any[]; // Add this to trigger reactivity
+  refreshing?: boolean;
+}
+
+let {
+  tabs = [],
+  activeFilter = '',
+  getFilterCount,
+  invitations = [],
+  refreshing = false,
+}: Props = $props();
 
 const dispatch = createEventDispatcher<{
   filterChange: { filterId: string };
-  refresh: {};
+  refresh: object;
 }>();
 
 // Create reactive counts based on invitations array
-$: counts =
+let counts = $derived(
   invitations.length >= 0
     ? tabs.reduce(
         (acc, tab) => {
@@ -24,9 +36,12 @@ $: counts =
         },
         {} as Record<string, number>
       )
-    : {};
+    : {}
+);
 
-$: console.log('TabFilter counts:', counts, 'invitations length:', invitations.length);
+run(() => {
+  console.log('TabFilter counts:', counts, 'invitations length:', invitations.length);
+});
 
 function handleTabClick(tabId: string) {
   dispatch('filterChange', { filterId: tabId });
@@ -44,7 +59,7 @@ function handleRefresh() {
         {#each tabs as tab}
           <button
             type="button"
-            on:click={() => handleTabClick(tab.id)}
+            onclick={() => handleTabClick(tab.id)}
             class="py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
               {activeFilter === tab.id 
                 ? 'border-blue-500 text-blue-600' 
@@ -72,7 +87,7 @@ function handleRefresh() {
       <!-- Refresh Button -->
       <button
         type="button"
-        on:click={handleRefresh}
+        onclick={handleRefresh}
         disabled={refreshing}
         class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 
                hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors 

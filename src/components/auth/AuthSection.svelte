@@ -1,21 +1,21 @@
 <script>
+import { thepiaColors } from '@thepia/branding';
 import { onMount } from 'svelte';
 import { cleanInvitationUrl, handleInvitationUrl } from '../../utils/invitationHandler';
-import { thepiaColors } from '@thepia/branding';
 
 // Import icons for replacing inline SVGs
-import { Warning, CheckCircle, User } from 'phosphor-svelte';
+import { CheckCircle, User, Warning } from 'phosphor-svelte';
 
 // Browser detection for Astro environment
 const browser = typeof window !== 'undefined';
 
 let authStore = null;
 let authConfig = null;
-let SignInFormComponent = null;
-let isLoading = true;
-let authError = null;
-let isAuthenticated = false;
-let currentUser = null;
+let SignInFormComponent = $state(null);
+let isLoading = $state(true);
+let authError = $state(null);
+let isAuthenticated = $state(false);
+let currentUser = $state(null);
 
 // Detect available API server (same as AuthContextProvider)
 async function detectApiServerUrl() {
@@ -70,7 +70,7 @@ onMount(async () => {
         companyName: 'Thepia Flows',
         logoUrl: '/favicon.svg',
         primaryColor: thepiaColors.primary,
-        showPoweredBy: true
+        showPoweredBy: true,
       },
     };
 
@@ -90,7 +90,7 @@ onMount(async () => {
         isAuthenticated: authIsAuthenticated,
         hasUser: !!$auth.user,
         userEmail: $auth.user?.email,
-        state: $auth.state
+        state: $auth.state,
       });
 
       currentUser = $auth.user;
@@ -114,7 +114,10 @@ onMount(async () => {
           window.location.href = '/app';
         } else {
           // FR9.2: Normal authentication - show "Open Demo" button, don't auto-redirect
-          console.log('🔍 AuthSection: User authenticated, showing Open Demo button for:', currentUser.email);
+          console.log(
+            '🔍 AuthSection: User authenticated, showing Open Demo button for:',
+            currentUser.email
+          );
         }
       }
     });
@@ -122,7 +125,7 @@ onMount(async () => {
     // Check initial authentication state using the isAuthenticated function
     const initialIsAuthenticated = authStore.isAuthenticated();
     console.log('🔍 AuthSection: Initial auth state check:', {
-      isAuthenticated: initialIsAuthenticated
+      isAuthenticated: initialIsAuthenticated,
     });
 
     // FR9.2: AuthSection MUST NOT automatically redirect authenticated users from landing page
@@ -180,7 +183,7 @@ function handleStepChange(detail) {
       <h3 class="text-lg font-medium text-red-800 mb-2">Authentication Error</h3>
       <p class="text-red-600 mb-4">{authError}</p>
       <button
-        on:click={() => window.location.reload()}
+        onclick={() => window.location.reload()}
         class="btn-secondary"
       >
         Try Again
@@ -195,7 +198,7 @@ function handleStepChange(detail) {
       <h3 class="text-lg font-medium text-green-800 mb-2">Welcome back, {currentUser?.email || 'User'}!</h3>
       <p class="text-green-600 mb-4">You're already signed in.</p>
       <button
-        on:click={() => window.location.href = '/app'}
+        onclick={() => window.location.href = '/app'}
         class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200"
       >
         Open Demo App
@@ -204,7 +207,7 @@ function handleStepChange(detail) {
   {:else if SignInFormComponent}
     <!-- SignInForm Component - gets config from context via useAuthSafe() -->
     <div class="signin-form-wrapper">
-      <svelte:component this={SignInFormComponent}
+      <SignInFormComponent
         size="medium"
         variant="inline"
         className="thepia-flows-signin"

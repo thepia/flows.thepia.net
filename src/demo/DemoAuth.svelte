@@ -4,17 +4,21 @@ import { createEventDispatcher, onMount } from 'svelte';
 const browser = typeof window !== 'undefined';
 import { reportSupabaseError } from '../lib/config/errorReporting.js';
 
-export let authStore: any;
+interface Props {
+  authStore: any;
+}
+
+let { authStore }: Props = $props();
 export const invitationToken = null;
 
 const dispatch = createEventDispatcher();
 
-let _SignInForm = null;
-let authComponentLoaded = false;
-let authComponentError = null;
-let registrationMode = false;
-let invitationData = null;
-let isNewUserRegistration = false;
+let _SignInForm = $state(null);
+let authComponentLoaded = $state(false);
+let authComponentError = $state(null);
+let registrationMode = $state(false);
+let invitationData = $state(null);
+let isNewUserRegistration = $state(false);
 
 onMount(async () => {
   if (!browser) return;
@@ -234,7 +238,7 @@ function _toggleMode() {
         {authComponentError}
       </p>
       <button
-        on:click={() => window.location.reload()}
+        onclick={() => window.location.reload()}
         class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md transition-colors"
       >
         Retry
@@ -249,6 +253,7 @@ function _toggleMode() {
     </div>
   {:else if _SignInForm}
     <!-- Flows Auth Sign In/Registration Form -->
+    {@const SvelteComponent = _SignInForm}
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
       {#if isNewUserRegistration}
         <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
@@ -263,8 +268,7 @@ function _toggleMode() {
         </div>
       {/if}
       
-      <svelte:component 
-        this={_SignInForm}
+      <SvelteComponent
         config={authStore.config}
         showLogo={false}
         compact={false}
@@ -282,7 +286,7 @@ function _toggleMode() {
             {registrationMode ? 'Already have a Thepia account?' : 'First time using Thepia Flows?'}
           </p>
           <button
-            on:click={_toggleMode}
+            onclick={_toggleMode}
             class="text-sm text-primary hover:underline font-medium"
           >
             {registrationMode ? 'Sign in with existing account' : 'Create account with invitation'}

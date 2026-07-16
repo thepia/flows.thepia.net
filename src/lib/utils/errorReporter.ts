@@ -129,7 +129,7 @@ class AdminErrorReporter {
     const failedRetries: { event: AdminErrorReportEvent; attempts: number }[] = [];
 
     for (const { event, attempts } of this.retryQueue) {
-      if (attempts >= this.config.maxRetries!) {
+      if (attempts >= (this.config.maxRetries ?? 1)) {
         if (this.config.debug) {
           console.warn('📊 [AdminErrorReporter] Max retries reached for event:', event);
         }
@@ -138,7 +138,7 @@ class AdminErrorReporter {
 
       try {
         await this.sendEvent(event);
-      } catch (error) {
+      } catch (_error) {
         failedRetries.push({ event, attempts: attempts + 1 });
       }
     }

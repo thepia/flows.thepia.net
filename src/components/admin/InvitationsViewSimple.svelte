@@ -1,4 +1,6 @@
 <script lang="ts">
+import { preventDefault } from 'svelte/legacy';
+
 import { onMount } from 'svelte';
 import { reportSupabaseError } from '../../lib/config/errorReporting.js';
 import { supabase } from '../../lib/supabase.js';
@@ -6,13 +8,13 @@ import { user } from '../../stores/auth.ts';
 import InvitationCard from './InvitationCard.svelte';
 import TabFilter from './TabFilter.svelte';
 
-let invitations: any[] = [];
-let loading = true;
-let error: string | null = null;
-let newInvitationEmail = '';
-let creating = false;
-let activeFilter = 'unresolved';
-let refreshing = false;
+let invitations: any[] = $state([]);
+let loading = $state(true);
+let error: string | null = $state(null);
+let newInvitationEmail = $state('');
+let creating = $state(false);
+let activeFilter = $state('unresolved');
+let refreshing = $state(false);
 
 // Filter tabs configuration
 const filterTabs = [
@@ -27,7 +29,7 @@ const filterTabs = [
 ];
 
 // Simple filtering logic
-$: filteredInvitations =
+let filteredInvitations = $derived(
   Array.isArray(invitations) && activeFilter
     ? invitations.filter((invitation) => {
         if (!invitation || !invitation.status) return false;
@@ -53,7 +55,8 @@ $: filteredInvitations =
             return true;
         }
       })
-    : [];
+    : []
+);
 
 onMount(() => {
   loadInvitations();
@@ -544,7 +547,7 @@ async function handleEmailSent(
       Create New Invitation
     </h2>
     
-    <form on:submit|preventDefault={createInvitation} class="flex gap-4">
+    <form onsubmit={preventDefault(createInvitation)} class="flex gap-4">
       <div class="flex-1">
         <input
           type="email"

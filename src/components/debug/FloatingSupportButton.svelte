@@ -1,45 +1,49 @@
 <script>
 import { thepiaColors } from '@thepia/branding';
-import { Activity, Warning, CheckCircle, XCircle } from 'phosphor-svelte';
+import { Activity, CheckCircle, Warning, XCircle } from 'phosphor-svelte';
 import { onDestroy, onMount } from 'svelte';
 
-let showPopover = false;
-let activeTab = 'chat';
+let showPopover = $state(false);
+let activeTab = $state('chat');
 
 // System Status
-let errorReportingStatus = 'checking';
-let devServerStatus = 'checking';
-let apiServerStatus = 'checking';
-let databaseStatus = 'checking';
-let queueSize = 0;
+let errorReportingStatus = $state('checking');
+let devServerStatus = $state('checking');
+let apiServerStatus = $state('checking');
+let databaseStatus = $state('checking');
+let queueSize = $state(0);
 
 // Environment
-let currentEnvironment = 'Development';
+let currentEnvironment = $state('Development');
 let errorEndpoint = '/dev/error-reports';
-let apiEndpoint = 'https://dev.thepia.com:8443';
-let dbEndpoint = 'Supabase';
+let apiEndpoint = $state('https://dev.thepia.com:8443');
+let dbEndpoint = $state('Supabase');
 
-$: overallStatus = (() => {
-  const statuses = [errorReportingStatus, devServerStatus, apiServerStatus, databaseStatus];
+let overallStatus = $derived(
+  (() => {
+    const statuses = [errorReportingStatus, devServerStatus, apiServerStatus, databaseStatus];
 
-  if (statuses.includes('error') || queueSize > 5) return 'error';
-  if (statuses.includes('warning') || queueSize > 0) return 'warning';
-  if (statuses.every((s) => s === 'connected' || s === 'healthy')) return 'healthy';
-  return 'checking';
-})();
+    if (statuses.includes('error') || queueSize > 5) return 'error';
+    if (statuses.includes('warning') || queueSize > 0) return 'warning';
+    if (statuses.every((s) => s === 'connected' || s === 'healthy')) return 'healthy';
+    return 'checking';
+  })()
+);
 
-$: statusConfig = (() => {
-  switch (overallStatus) {
-    case 'healthy':
-      return { ring: 'ring-green-500', bg: 'bg-green-50', icon: '✓' };
-    case 'warning':
-      return { ring: 'ring-yellow-500', bg: 'bg-yellow-50', icon: '⚠' };
-    case 'error':
-      return { ring: 'ring-red-500', bg: 'bg-red-50', icon: '✗' };
-    default:
-      return { ring: 'ring-gray-500', bg: 'bg-gray-50', icon: '◯' };
-  }
-})();
+let statusConfig = $derived(
+  (() => {
+    switch (overallStatus) {
+      case 'healthy':
+        return { ring: 'ring-green-500', bg: 'bg-green-50', icon: '✓' };
+      case 'warning':
+        return { ring: 'ring-yellow-500', bg: 'bg-yellow-50', icon: '⚠' };
+      case 'error':
+        return { ring: 'ring-red-500', bg: 'bg-red-50', icon: '✗' };
+      default:
+        return { ring: 'ring-gray-500', bg: 'bg-gray-50', icon: '◯' };
+    }
+  })()
+);
 
 async function checkSystemStatus() {
   console.log('🔍 Checking system status...');
@@ -74,10 +78,10 @@ async function checkSystemStatus() {
         console.log('ℹ️ Dev server: Disabled in production (expected)');
       } else if (response.ok) {
         devServerStatus = 'connected';
-        console.log(`✅ Dev server (/dev/error-reports): connected`);
+        console.log('✅ Dev server (/dev/error-reports): connected');
       } else {
         devServerStatus = 'warning';
-        console.log(`⚠️ Dev server (/dev/error-reports): warning`);
+        console.log('⚠️ Dev server (/dev/error-reports): warning');
       }
     } catch (error) {
       console.error('❌ Dev server check failed:', error);
@@ -166,7 +170,7 @@ onMount(() => {
   <button
     class="relative w-12 h-12 rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2"
     style="--ring-color: {thepiaColors.primary}; ring-color: var(--ring-color);"
-    on:click={() => showPopover = !showPopover}
+    onclick={() => showPopover = !showPopover}
     title="Thepia System Console"
   >
     <!-- Thepia Logo -->
@@ -196,7 +200,7 @@ onMount(() => {
             class:border-transparent={activeTab !== 'chat'}
             class:text-gray-500={activeTab !== 'chat'}
             style={activeTab === 'chat' ? `border-color: ${thepiaColors.primary}; color: ${thepiaColors.primary}; background-color: ${thepiaColors.primary}15;` : ''}
-            on:click={() => activeTab = 'chat'}
+            onclick={() => activeTab = 'chat'}
           >
             Chat
           </button>
@@ -205,7 +209,7 @@ onMount(() => {
             class:border-transparent={activeTab !== 'status'}
             class:text-gray-500={activeTab !== 'status'}
             style={activeTab === 'status' ? `border-color: ${thepiaColors.primary}; color: ${thepiaColors.primary}; background-color: ${thepiaColors.primary}15;` : ''}
-            on:click={() => activeTab = 'status'}
+            onclick={() => activeTab = 'status'}
           >
             Status
           </button>
@@ -214,7 +218,7 @@ onMount(() => {
             class:border-transparent={activeTab !== 'debugging'}
             class:text-gray-500={activeTab !== 'debugging'}
             style={activeTab === 'debugging' ? `border-color: ${thepiaColors.primary}; color: ${thepiaColors.primary}; background-color: ${thepiaColors.primary}15;` : ''}
-            on:click={() => activeTab = 'debugging'}
+            onclick={() => activeTab = 'debugging'}
           >
             Debugging
           </button>
@@ -300,7 +304,7 @@ onMount(() => {
             
             <div class="space-y-2">
               <button
-                on:click={checkSystemStatus}
+                onclick={checkSystemStatus}
                 class="w-full px-3 py-2 text-sm rounded-md transition-colors"
                 style="background-color: {thepiaColors.primary}15; color: {thepiaColors.primaryDarker}; hover:background-color: {thepiaColors.primary}25;"
               >
@@ -308,7 +312,7 @@ onMount(() => {
               </button>
               
               <button
-                on:click={testErrorReport}
+                onclick={testErrorReport}
                 class="w-full px-3 py-2 text-sm bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-md transition-colors"
               >
                 🧪 Test Error Report
@@ -331,7 +335,7 @@ onMount(() => {
       <!-- Footer -->
       <div class="px-4 py-2 bg-gray-50 border-t border-gray-200">
         <button
-          on:click={() => showPopover = false}
+          onclick={() => showPopover = false}
           class="w-full text-xs text-gray-500 hover:text-gray-700"
         >
           Close Console

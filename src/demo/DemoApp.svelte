@@ -8,12 +8,12 @@ import DemoAuth from './DemoAuth.svelte';
 import DemoContent from './DemoContent.svelte';
 import LoadingSpinner from './LoadingSpinner.svelte';
 
-let authStore = null;
-let authLoaded = false;
-let authError = null;
-let currentUser = null;
-let isAuthenticated = false;
-let invitationToken = null;
+let authStore = $state(null);
+let authLoaded = $state(false);
+let authError = $state(null);
+let currentUser = $state(null);
+let isAuthenticated = $state(false);
+let invitationToken = $state(null);
 
 // Detect available API server (local first, then production)
 async function detectApiServer(): Promise<string> {
@@ -52,40 +52,40 @@ onMount(async () => {
 
   try {
     // Dynamically import flows-auth session functions and auth store
-    const { 
+    const {
       isAuthenticatedFromSession,
       getCurrentUserFromSession,
       getAccessTokenFromSession,
-      createAuthStore 
+      createAuthStore,
     } = await import('@thepia/flows-auth');
 
     // Initialize auth store for sign out functionality
     const apiBaseUrl = await detectApiServer();
     authStore = createAuthStore({
       apiBaseUrl,
-      sessionStorage: 'session' // Use sessionStorage for this demo
+      sessionStorage: 'session', // Use sessionStorage for this demo
     });
     console.log('🔒 Auth store initialized for DemoApp');
 
     // Check authentication from sessionStorage (thepia.com pattern)
     isAuthenticated = isAuthenticatedFromSession();
     currentUser = getCurrentUserFromSession();
-    
+
     console.log('🔍 DemoApp session check:', {
       isAuthenticated,
       hasUser: !!currentUser,
-      userEmail: currentUser?.email
+      userEmail: currentUser?.email,
     });
 
     // Listen for session updates
     window.addEventListener('sessionUpdate', (event) => {
       isAuthenticated = isAuthenticatedFromSession();
       currentUser = getCurrentUserFromSession();
-      
+
       console.log('🔍 DemoApp session updated:', {
         isAuthenticated,
         hasUser: !!currentUser,
-        sessionData: event.detail
+        sessionData: event.detail,
       });
     });
 
@@ -121,10 +121,10 @@ function _handleAuthError(event) {
 // Handle sign out
 async function _handleSignOut() {
   if (!browser) return;
-  
+
   const userEmail = currentUser?.email;
   console.log('🔒 DemoApp sign out initiated', { userEmail });
-  
+
   try {
     if (authStore) {
       // Use proper auth store signOut method
@@ -137,16 +137,18 @@ async function _handleSignOut() {
       sessionStorage.removeItem('auth_access_token');
       sessionStorage.removeItem('auth_user');
     }
-    
+
     // Update local state
     currentUser = null;
     isAuthenticated = false;
-    
+
     // Dispatch session update event for other components
-    window.dispatchEvent(new CustomEvent('sessionUpdate', {
-      detail: { isAuthenticated: false, user: null }
-    }));
-    
+    window.dispatchEvent(
+      new CustomEvent('sessionUpdate', {
+        detail: { isAuthenticated: false, user: null },
+      })
+    );
+
     console.log('✅ DemoApp sign out completed');
   } catch (error) {
     console.error('❌ DemoApp sign out failed:', error);
@@ -206,7 +208,7 @@ async function _handleSignOut() {
           {authError}
         </p>
         <button
-          on:click={() => window.location.reload()}
+          onclick={() => window.location.reload()}
           class="px-4 py-2 bg-primary hover:bg-primary-600 text-white rounded-md transition-colors"
         >
           Retry

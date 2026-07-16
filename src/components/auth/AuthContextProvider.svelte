@@ -1,13 +1,18 @@
-<script>
+<script lang="ts">
 import { thepiaColors } from '@thepia/branding';
 import { onMount } from 'svelte';
+interface Props {
+  children?: import('svelte').Snippet;
+}
+
+let { children }: Props = $props();
 
 // Browser detection for Astro
 const browser = typeof window !== 'undefined';
 
 let authStore = null;
-let initError = null;
-let isLoading = true;
+let initError = $state(null);
+let isLoading = $state(true);
 
 // For synchronous context setup, we need to conditionally import
 let setAuthContext = null;
@@ -46,11 +51,11 @@ onMount(async () => {
   try {
     // Import flows-auth and use legacy global store approach
     const { initializeAuth } = await import('@thepia/flows-auth');
-    
+
     // Detect proper API server
     const apiBaseUrl = await detectApiServerUrl();
     console.log('🔧 AuthContextProvider detected API server:', apiBaseUrl);
-    
+
     // Create auth configuration with detected API server
     const authConfig = {
       apiBaseUrl: apiBaseUrl,
@@ -64,19 +69,18 @@ onMount(async () => {
         companyName: 'Thepia Flows',
         logoUrl: '/favicon.svg',
         primaryColor: thepiaColors.primary,
-        showPoweredBy: true
+        showPoweredBy: true,
       },
     };
 
     // Use legacy global store pattern that works with async initialization
     authStore = initializeAuth(authConfig);
     console.log('✅ Auth global store initialized with API server:', apiBaseUrl);
-    
+
     // Initialize the auth store
     await authStore.initialize();
     isLoading = false;
     console.log('✅ Auth store fully initialized');
-    
   } catch (err) {
     console.error('Failed to initialize auth store:', err);
     initError = err.message || 'Failed to initialize authentication system';
@@ -105,7 +109,7 @@ onMount(async () => {
       <span class="ml-3 text-gray-600">Initializing authentication...</span>
     </div>
   {:else}
-    <slot />
+    {@render children?.()}
   {/if}
 {:else}
   <!-- SSR fallback - don't render anything during SSR -->

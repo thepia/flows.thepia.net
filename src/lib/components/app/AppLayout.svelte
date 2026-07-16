@@ -5,21 +5,26 @@ import { writable } from 'svelte/store';
 // Browser detection for Astro
 const browser = typeof window !== 'undefined';
 import { thepiaColors } from '@thepia/branding';
-import { List, X, Gear, SignOut, User, Buildings, CaretLeft, CaretRight } from 'phosphor-svelte';
+import { Buildings, CaretLeft, CaretRight, Gear, List, SignOut, User, X } from 'phosphor-svelte';
+import { reportSupabaseError } from '../../config/errorReporting.js';
 import { cn } from '../../utils';
+import Badge from '../ui/badge/badge.svelte';
 import Button from '../ui/button/button.svelte';
-import Card from '../ui/card/card.svelte';
 import CardContent from '../ui/card/card-content.svelte';
 import CardDescription from '../ui/card/card-description.svelte';
 import CardHeader from '../ui/card/card-header.svelte';
 import CardTitle from '../ui/card/card-title.svelte';
-import Badge from '../ui/badge/badge.svelte';
+import Card from '../ui/card/card.svelte';
 import Separator from '../ui/separator/separator.svelte';
-import { reportSupabaseError } from '../../config/errorReporting.js';
 
-export let currentUser: any;
-export let clientId: string = '';
-export let userRole: 'admin' | 'manager' | 'employee' = 'employee';
+interface Props {
+  currentUser: any;
+  clientId?: string;
+  userRole?: 'admin' | 'manager' | 'employee';
+  children?: import('svelte').Snippet;
+}
+
+let { currentUser, clientId = '', userRole = 'employee', children }: Props = $props();
 
 // Sidebar state
 let sidebarOpen = writable(userRole === 'admin' || userRole === 'manager');
@@ -27,12 +32,9 @@ let sidebarCollapsed = writable(userRole === 'employee');
 let mobileMenuOpen = writable(false);
 
 // Current client information
-let currentClient: any = null;
-let loading = false;
-let error: string | null = null;
-
-// Navigation items based on user role
-$: navigationItems = getNavigationItems(userRole);
+let currentClient: any = $state(null);
+let loading = $state(false);
+let error: string | null = $state(null);
 
 function getNavigationItems(role: string) {
   const baseItems = [
@@ -77,7 +79,7 @@ onMount(async () => {
   } catch (err) {
     console.error('Error loading client:', err);
     error = err.message || 'Failed to load client information';
-    
+
     await reportSupabaseError('app', 'load_client', err, {
       operation: 'loadClient',
       component: 'AppLayout',
@@ -91,17 +93,17 @@ onMount(async () => {
 
 // Toggle sidebar
 function toggleSidebar() {
-  sidebarOpen.update(open => !open);
+  sidebarOpen.update((open) => !open);
 }
 
 // Toggle sidebar collapsed state
 function toggleSidebarCollapsed() {
-  sidebarCollapsed.update(collapsed => !collapsed);
+  sidebarCollapsed.update((collapsed) => !collapsed);
 }
 
 // Toggle mobile menu
 function toggleMobileMenu() {
-  mobileMenuOpen.update(open => !open);
+  mobileMenuOpen.update((open) => !open);
 }
 
 // Handle navigation
@@ -146,6 +148,8 @@ function getClientStatusBadge(status: string) {
       return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
   }
 }
+// Navigation items based on user role
+let navigationItems = $derived(getNavigationItems(userRole));
 </script>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -153,8 +157,8 @@ function getClientStatusBadge(status: string) {
   {#if $mobileMenuOpen}
     <div 
       class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-      on:click={toggleMobileMenu}
-      on:keydown={(e) => e.key === 'Escape' && toggleMobileMenu()}
+      onclick={toggleMobileMenu}
+      onkeydown={(e) => e.key === 'Escape' && toggleMobileMenu()}
       role="button"
       tabindex="0"
     ></div>
@@ -242,7 +246,7 @@ function getClientStatusBadge(status: string) {
     <nav class="flex-1 p-4 space-y-2">
       {#each navigationItems as item}
         <button
-          on:click={() => handleNavigation(item)}
+          onclick={() => handleNavigation(item)}
           class={cn(
             "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
             "hover:bg-gray-100 dark:hover:bg-gray-700",
@@ -366,7 +370,7 @@ function getClientStatusBadge(status: string) {
         </Card>
       {:else}
         <!-- Content slot -->
-        <slot />
+        {@render children?.()}
       {/if}
     </main>
   </div>

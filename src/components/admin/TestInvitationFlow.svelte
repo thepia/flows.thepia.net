@@ -1,22 +1,24 @@
 <script lang="ts">
+import { preventDefault } from 'svelte/legacy';
+
 import { onMount } from 'svelte';
 import { reportSupabaseError } from '../../lib/config/errorReporting.js';
 import { supabase } from '../../lib/supabase.js';
 import { user } from '../../stores/auth.ts';
 
-let testEmail = '';
-let testName = 'Test User';
-let testCompany = 'Test Company';
-let testWorkflowType = 'Employee Onboarding';
-let testComment = 'Test request for flows demo access';
-let testDemoDuration = '14_days';
-let testTeamSize = '2-5';
-let testTimeline = 'this_week';
-let testRole = 'HR Manager';
-let creating = false;
-let error: string | null = null;
-let success: string | null = null;
-let lastCreatedRequest: any = null;
+let testEmail = $state('');
+let testName = $state('Test User');
+let testCompany = $state('Test Company');
+let testWorkflowType = $state('Employee Onboarding');
+let testComment = $state('Test request for flows demo access');
+let testDemoDuration = $state('14_days');
+let testTeamSize = $state('2-5');
+let testTimeline = $state('this_week');
+let testRole = $state('HR Manager');
+let creating = $state(false);
+let error: string | null = $state(null);
+let success: string | null = $state(null);
+let lastCreatedRequest: any = $state(null);
 
 // Demo request test data templates matching FlowsDemoAccessForm
 const testTemplates = [
@@ -85,7 +87,9 @@ function applyTemplate(template: any) {
   testEmail = createTestEmail();
 
   success = `Applied template: ${template.name}`;
-  setTimeout(() => (success = null), 3000);
+  setTimeout(() => {
+    success = null;
+  }, 3000);
 }
 
 /**
@@ -197,7 +201,7 @@ async function simulateDemoRequest() {
     console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
-      let errorData;
+      let errorData: unknown;
       try {
         errorData = await response.json();
       } catch (jsonError) {
@@ -392,7 +396,7 @@ onMount(() => {
       {#each testTemplates as template}
         <button
           type="button"
-          on:click={() => applyTemplate(template)}
+          onclick={() => applyTemplate(template)}
           disabled={creating}
           class="px-3 py-1.5 text-xs font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 
                  dark:text-purple-300 dark:bg-purple-900/20 dark:hover:bg-purple-900/30 
@@ -405,7 +409,7 @@ onMount(() => {
   </div>
 
   <!-- Demo Request Form -->
-  <form on:submit|preventDefault={simulateDemoRequest} class="space-y-4">
+  <form onsubmit={preventDefault(simulateDemoRequest)} class="space-y-4">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label for="testEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -425,7 +429,7 @@ onMount(() => {
           />
           <button
             type="button"
-            on:click={generateTestEmail}
+            onclick={generateTestEmail}
             disabled={creating}
             class="px-3 py-2 text-xs font-medium text-gray-600 hover:text-gray-800 
                    dark:text-gray-400 dark:hover:text-gray-200 border border-gray-300 

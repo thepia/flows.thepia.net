@@ -1,40 +1,42 @@
 <script lang="ts">
+import { preventDefault } from 'svelte/legacy';
+
 import { thepiaColors } from '@thepia/branding';
+import {
+  AccountCreationForm,
+  SignInForm,
+  configureSessionStorage,
+  createAuthStore,
+  decodeInvitationToken,
+  detectApiServer,
+  getCurrentUserFromSession,
+  getStorageConfig,
+  hashInvitationToken,
+  isAuthenticatedFromSession,
+  processInvitationToken,
+  validateInvitationToken,
+} from '@thepia/flows-auth';
 import { onMount } from 'svelte';
 import DemoApp from '../../demo/DemoApp.svelte';
 import LoadingSpinner from '../../demo/LoadingSpinner.svelte';
 import { cleanInvitationUrl } from '../../utils/invitationHandler';
-import { 
-  createAuthStore, 
-  SignInForm,
-  AccountCreationForm,
-  isAuthenticatedFromSession,
-  getCurrentUserFromSession,
-  detectApiServer,
-  configureSessionStorage,
-  getStorageConfig,
-  decodeInvitationToken,
-  validateInvitationToken,
-  hashInvitationToken,
-  processInvitationToken
-} from '@thepia/flows-auth';
 
 // Browser detection for Astro
 const browser = typeof window !== 'undefined';
 
-let authStore = null;
-let authLoaded = false;
-let determiningMode = false;
-let authError = null;
+let authStore = $state(null);
+let authLoaded = $state(false);
+let determiningMode = $state(false);
+let authError = $state(null);
 let invitationToken = null;
-let tokenData = null;
-let showAccountCreationForm = false;
+let tokenData = $state(null);
+let showAccountCreationForm = $state(false);
 let tokenValid = false;
-let signinEmail = '';
-let isAuthenticated = false;
-let currentUser = null;
-let isSigningIn = false;
-let apiBaseUrl = 'https://api.thepia.com'; // Default to production, will be updated in onMount
+let signinEmail = $state('');
+let isAuthenticated = $state(false);
+let currentUser = $state(null);
+let isSigningIn = $state(false);
+let apiBaseUrl = $state('https://api.thepia.com'); // Default to production, will be updated in onMount
 
 // Session functions - now imported statically
 
@@ -84,7 +86,7 @@ onMount(async () => {
     configureSessionStorage({
       type: 'sessionStorage',
       userRole: 'guest', // Start conservative - will upgrade after authentication
-      sessionTimeout: 8 * 60 * 60 * 1000 // 8 hours default
+      sessionTimeout: 8 * 60 * 60 * 1000, // 8 hours default
     });
 
     console.log('🗄️ Storage configured with conservative defaults:', getStorageConfig());
@@ -101,7 +103,7 @@ onMount(async () => {
       // Remove hardcoded storage config - use dynamic configuration
       applicationContext: {
         userType: 'mixed', // Public demo site with mixed user types
-        forceGuestMode: true // Always start with guest mode for security
+        forceGuestMode: true, // Always start with guest mode for security
       },
       branding: {
         companyName: 'Thepia Flows',
@@ -119,7 +121,7 @@ onMount(async () => {
         console.log('🔍 Auth state updated:', {
           isAuthenticated,
           hasUser: !!currentUser,
-          source: 'updateAuthState'
+          source: 'updateAuthState',
         });
 
         // Clean up invitation URL if authenticated
@@ -142,7 +144,7 @@ onMount(async () => {
       console.log('🔍 Session updated via event:', {
         isAuthenticated,
         hasUser: !!currentUser,
-        sessionData: event.detail
+        sessionData: event.detail,
       });
     });
 
@@ -156,7 +158,7 @@ onMount(async () => {
         storeUser: !!$auth.user,
         storeAccessToken: !!$auth.access_token,
         sessionAuthenticated: isAuthenticated,
-        sessionUser: !!currentUser
+        sessionUser: !!currentUser,
       });
 
       // Debug: Check what's in sessionStorage
@@ -167,7 +169,7 @@ onMount(async () => {
       if (isAuthenticatedFromSession && getCurrentUserFromSession) {
         console.log('🔍 Session function results:', {
           isAuthenticatedFromSession: isAuthenticatedFromSession(),
-          getCurrentUserFromSession: getCurrentUserFromSession()
+          getCurrentUserFromSession: getCurrentUserFromSession(),
         });
       }
 
@@ -175,15 +177,19 @@ onMount(async () => {
       if ($auth.state === 'authenticated' && $auth.user) {
         const userRole = $auth.user.metadata?.role;
         console.log('🔍 User authenticated with role:', userRole);
-        
+
         // Note: Storage configuration should be handled by the auth store itself
         // during the registration/authentication process. We don't need to manually
         // upgrade storage here since the auth store manages session persistence.
-        
+
         if (userRole === 'employee') {
-          console.log('👨‍💼 Employee user authenticated - auth store should have configured appropriate storage');
+          console.log(
+            '👨‍💼 Employee user authenticated - auth store should have configured appropriate storage'
+          );
         } else if (userRole === 'admin') {
-          console.log('👨‍💻 Admin user authenticated - auth store should have configured appropriate storage');
+          console.log(
+            '👨‍💻 Admin user authenticated - auth store should have configured appropriate storage'
+          );
         } else {
           console.log('👤 Guest user authenticated - using conservative storage defaults');
         }
@@ -200,16 +206,16 @@ onMount(async () => {
 
     // Check for existing session on page load
     updateAuthState();
-    
+
     console.log('🔍 Initial session check:', {
       isAuthenticated,
       hasUser: !!currentUser,
-      invitationToken: !!invitationToken
+      invitationToken: !!invitationToken,
     });
-    
+
     if (isAuthenticated && currentUser) {
       console.log('🎯 User already authenticated');
-      
+
       // Clean up invitation URL if present
       if (invitationToken) {
         cleanInvitationUrl();
@@ -241,7 +247,7 @@ async function checkTokenAndUserStatus() {
           }
         }
       },
-      enableDebugLogging: true
+      enableDebugLogging: true,
     });
 
     // Handle result based on recommended action
@@ -250,7 +256,7 @@ async function checkTokenAndUserStatus() {
         showAccountCreationForm = false;
         authError = null;
         break;
-        
+
       case 'register':
       case 'complete_registration':
         // Pre-fill registration data from token
@@ -261,9 +267,10 @@ async function checkTokenAndUserStatus() {
         showAccountCreationForm = true;
         authError = null;
         break;
-        
+
       case 'error':
-        authError = result.error || 'Unable to verify invitation. Please try again or contact support.';
+        authError =
+          result.error || 'Unable to verify invitation. Please try again or contact support.';
         showAccountCreationForm = false;
         break;
     }
@@ -303,7 +310,7 @@ function handleAppAccess(event) {
   console.log('📱 AccountCreationForm appAccess event received - redirecting to DemoApp:', {
     user: user?.email,
     autoSignIn,
-    emailVerifiedViaInvitation
+    emailVerifiedViaInvitation,
   });
 
   // Clean invitation URL since registration is complete
@@ -355,7 +362,6 @@ function handleSwitchToSignIn() {
   authError = null;
 }
 
-
 // Invitation token utilities are now imported from @thepia/flows-auth
 
 // Switch to sign-in mode
@@ -379,9 +385,9 @@ async function handlePasskeySignIn() {
     console.log('🔍 DEMO: About to call authStore.signInWithPasskey with:', signinEmail);
     console.log('🔍 DEMO: authStore type:', typeof authStore);
     console.log('🔍 DEMO: authStore.signInWithPasskey type:', typeof authStore?.signInWithPasskey);
-    
+
     const result = await authStore.signInWithPasskey(signinEmail);
-    
+
     console.log('🔍 DEMO: signInWithPasskey result:', result);
 
     if (result.step === 'success' && result.user) {
@@ -391,7 +397,7 @@ async function handlePasskeySignIn() {
     }
   } catch (error) {
     console.error('Passkey sign-in failed:', error);
-    
+
     // Send detailed error to error reports for debugging
     if (window.ErrorReporter) {
       window.ErrorReporter.reportError('WebAuthn sign-in failure', {
@@ -400,7 +406,7 @@ async function handlePasskeySignIn() {
         errorMessage: error.message,
         errorDetails: error,
         userAgent: navigator.userAgent,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 
@@ -563,7 +569,7 @@ async function handlePasskeySignIn() {
           <h2 class="signin-title">Sign In</h2>
           <p class="signin-subtitle">Use your passkey to securely access your account</p>
           
-          <form on:submit|preventDefault={handlePasskeySignIn}>
+          <form onsubmit={preventDefault(handlePasskeySignIn)}>
             <div class="form-field">
               <label for="signin-email">Email Address</label>
               <input
@@ -607,7 +613,7 @@ async function handlePasskeySignIn() {
         <!-- Fallback -->
         <div class="fallback-container">
           <p>Authentication system unavailable</p>
-          <button on:click={() => window.location.reload()} class="retry-button">
+          <button onclick={() => window.location.reload()} class="retry-button">
             Retry
           </button>
         </div>

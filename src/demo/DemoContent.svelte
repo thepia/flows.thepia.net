@@ -1,23 +1,30 @@
 <script lang="ts">
+import { createBubbler, preventDefault, stopPropagation } from 'svelte/legacy';
+
+const bubble = createBubbler();
 import { createEventDispatcher, onMount } from 'svelte';
 import { reportSupabaseError } from '../lib/config/errorReporting.js';
 import { supabase } from '../lib/supabase.js';
 
-export let currentUser: any;
+interface Props {
+  currentUser: any;
+}
+
+let { currentUser }: Props = $props();
 export const invitationToken = null;
 
 const dispatch = createEventDispatcher();
 
-let invitationData = null;
-let userTasks = [];
-let newTask = {
+let invitationData = $state(null);
+let userTasks = $state([]);
+let newTask = $state({
   title: '',
   description: '',
   assignee_email: '',
   priority: 'medium',
   due_date: '',
   category: 'interview',
-};
+});
 const availableUsers = [
   { email: 'candidate1@example.com', name: 'Sarah Johnson', role: 'Frontend Developer' },
   { email: 'candidate2@example.com', name: 'Mike Chen', role: 'Backend Developer' },
@@ -32,13 +39,13 @@ const taskCategories = [
   { id: 'offer', name: 'Offer Management', icon: '📜' },
   { id: 'onboarding', name: 'Onboarding Prep', icon: '🎯' },
 ];
-let loading = false;
-let error = null;
-let showCreateTask = false;
-let creating = false;
+let loading = $state(false);
+let error = $state(null);
+let showCreateTask = $state(false);
+let creating = $state(false);
 
-let isNewUser = false;
-let accountCreated = false;
+let isNewUser = $state(false);
+let accountCreated = $state(false);
 
 onMount(async () => {
   // Decode invitation data if available
@@ -425,7 +432,7 @@ function isOverdue(dueDate) {
       
       <div class="flex items-center gap-3">
         <button
-          on:click={() => showCreateTask = true}
+          onclick={() => showCreateTask = true}
           class="px-4 py-2 bg-primary hover:bg-primary-600 text-white text-sm font-medium 
                  rounded-md transition-colors flex items-center gap-2"
         >
@@ -436,7 +443,7 @@ function isOverdue(dueDate) {
         </button>
         
         <button
-          on:click={() => dispatch('signOut')}
+          onclick={() => dispatch('signOut')}
           class="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 
                  text-gray-700 dark:text-gray-300 rounded-md transition-colors"
         >
@@ -448,18 +455,18 @@ function isOverdue(dueDate) {
 
   <!-- Create Task Modal -->
   {#if showCreateTask}
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" on:click={() => showCreateTask = false} on:keydown={(e) => e.key === 'Escape' && (showCreateTask = false)} role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 w-full max-w-md m-4" on:click|stopPropagation role="document">
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onclick={() => showCreateTask = false} onkeydown={(e) => e.key === 'Escape' && (showCreateTask = false)} role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 w-full max-w-md m-4" onclick={stopPropagation(bubble('click'))} role="document">
         <div class="flex items-center justify-between mb-4">
           <h3 id="modal-title" class="text-lg font-semibold text-gray-900 dark:text-white">Create New Task</h3>
-          <button on:click={() => showCreateTask = false} class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+          <button onclick={() => showCreateTask = false} class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>
         </div>
         
-        <form on:submit|preventDefault={createTask} class="space-y-4">
+        <form onsubmit={preventDefault(createTask)} class="space-y-4">
           <!-- Task Title -->
           <div>
             <label for="task-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Title</label>
@@ -553,7 +560,7 @@ function isOverdue(dueDate) {
             </button>
             <button
               type="button"
-              on:click={() => showCreateTask = false}
+              onclick={() => showCreateTask = false}
               class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 
                      text-gray-700 dark:text-gray-300 rounded-md transition-colors"
             >
@@ -639,7 +646,7 @@ function isOverdue(dueDate) {
         <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No tasks yet</h4>
         <p class="text-gray-600 dark:text-gray-400 mb-4">Create your first hiring task to get started.</p>
         <button
-          on:click={() => showCreateTask = true}
+          onclick={() => showCreateTask = true}
           class="px-4 py-2 bg-primary hover:bg-primary-600 text-white text-sm font-medium rounded-md transition-colors"
         >
           Create Task
@@ -682,7 +689,7 @@ function isOverdue(dueDate) {
               <div class="flex items-center gap-2 ml-4">
                 <select
                   bind:value={task.status}
-                  on:change={() => updateTaskStatus(task.id, task.status)}
+                  onchange={() => updateTaskStatus(task.id, task.status)}
                   class="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1
                          focus:outline-none focus:ring-1 focus:ring-primary dark:bg-gray-700 dark:text-white"
                 >
@@ -694,7 +701,7 @@ function isOverdue(dueDate) {
                 </select>
                 
                 <button
-                  on:click={() => deleteTask(task.id)}
+                  onclick={() => deleteTask(task.id)}
                   class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1"
                   title="Delete task"
                 >
