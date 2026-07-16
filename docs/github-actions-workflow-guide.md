@@ -44,8 +44,8 @@ on:
     branches: [main, develop]
 
 env:
-  NODE_VERSION: '18'
-  PNPM_VERSION: '10.11.0'
+  NODE_VERSION: '22'
+  PNPM_VERSION: '11.11.0'
 
 jobs:
   test:
@@ -163,8 +163,8 @@ on:
       - 'v*'
 
 env:
-  NODE_VERSION: '18'
-  PNPM_VERSION: '8.15.0'
+  NODE_VERSION: '22'
+  PNPM_VERSION: '11'
 
 jobs:
   publish:
@@ -340,8 +340,8 @@ fi
 ### **1. Environment Variables**
 ```yaml
 env:
-  NODE_VERSION: '18'
-  PNPM_VERSION: '10.11.0'
+  NODE_VERSION: '22'
+  PNPM_VERSION: '11.11.0'
 ```
 - Centralize versions for easy updates
 - Use consistent versions across workflows

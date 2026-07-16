@@ -42,7 +42,7 @@
     "@supabase/supabase-js": "^2.50.5",
     "@tailwindcss/vite": "^4.1.10",
     "@thepia/branding": "1.2.1",
-    "@thepia/flows-auth": "file:../flows-auth",
+    "@thepia/flows-auth": "~1.0.3",
     "astro": "^4.16.18",
     "bits-ui": "^2.8.11",
     "clsx": "^2.1.1",
@@ -66,14 +66,14 @@
     "concurrently": "^8.2.2",
     "jsdom": "^25.0.1",
     "node-fetch": "^3.3.2",
-    "phosphor-svelte": "2",
+    "phosphor-svelte": "2.0.*",
     "postcss": "^8.5.6",
-    "svelte-check": "^4.2.2",
-    "vitest": "^2.1.8"
+    "svelte-check": "^4.4.0",
+    "vitest": "^4.1.0"
   },
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@9.0.0"
+  "packageManager": "pnpm@11.5.0+sha512.dbfcc4f81cf48597afd4bc391ffdf12c11f1a9fb83a395bfa6b0a2d9cc2fd8ffebafdb1ccbd529632153f793904c2615b7f09fe1a345473fd1c35845172a8eb1"
 }

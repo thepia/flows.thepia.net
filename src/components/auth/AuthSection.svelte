@@ -1,40 +1,43 @@
 <script>
-import { thepiaColors } from '@thepia/branding';
 import { onMount } from 'svelte';
 import { cleanInvitationUrl, handleInvitationUrl } from '../../utils/invitationHandler';
+import { thepiaColors } from '@thepia/branding';
 
 // Import icons for replacing inline SVGs
-import { Warning, CheckCircle, User, Key, Lock, Shield, Certificate } from 'phosphor-svelte';
+import { Warning, CheckCircle, User } from 'phosphor-svelte';
 
 // Browser detection for Astro environment
 const browser = typeof window !== 'undefined';
 
 let authStore = null;
+let authConfig = null;
+let SignInFormComponent = null;
 let isLoading = true;
 let authError = null;
 let isAuthenticated = false;
 let currentUser = null;
-let isSigningIn = false;
-let signinEmail = '';
 
-// Detect available API server (local first, then production)
-async function detectApiServer() {
-  // Check for localhost development
+// Detect available API server (same as AuthContextProvider)
+async function detectApiServerUrl() {
+  // For localhost development, use production API directly to avoid CORS issues
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    return 'https://dev.thepia.com:8443';
+    console.log('🏠 Running on localhost - using production API to avoid CORS issues');
+    return 'https://api.thepia.com';
   }
 
-  // Try local development server first
-  try {
-    const localResponse = await fetch('https://dev.thepia.com:8443/health', {
-      signal: AbortSignal.timeout(3000),
-    });
-    if (localResponse.ok) {
-      console.log('🔧 Using local API server: https://dev.thepia.com:8443');
-      return 'https://dev.thepia.com:8443';
+  // For dev.thepia.net domains, try local development server first
+  if (typeof window !== 'undefined' && window.location.hostname.includes('dev.thepia.net')) {
+    try {
+      const localResponse = await fetch('https://dev.thepia.com:8443/health', {
+        signal: AbortSignal.timeout(3000),
+      });
+      if (localResponse.ok) {
+        console.log('🔧 Using local API server: https://dev.thepia.com:8443');
+        return 'https://dev.thepia.com:8443';
+      }
+    } catch (error) {
+      console.log('ℹ️ Local API server not available, using production');
     }
-  } catch (error) {
-    console.log('ℹ️ Local API server not available, using production');
   }
 
   // Fallback to production
@@ -46,27 +49,37 @@ onMount(async () => {
   if (!browser) return;
 
   try {
-    // Dynamically import flows-auth to avoid SSR issues
-    const { createAuthStore } = await import('@thepia/flows-auth');
-
-    // Detect available API server (local first, then production)
-    const apiBaseUrl = await detectApiServer();
+    // Detect available API server
+    const apiBaseUrl = await detectApiServerUrl();
     console.log('🔧 AuthSection using API server:', apiBaseUrl);
 
-    authStore = createAuthStore({
+    // Dynamically import flows-auth
+    const { createAuthStore, SignInForm } = await import('@thepia/flows-auth');
+    SignInFormComponent = SignInForm;
+
+    // Create auth configuration
+    authConfig = {
       apiBaseUrl: apiBaseUrl,
       clientId: 'thepia-flows-landing',
+      signInMode: 'login-or-register',
       domain: 'thepia.net',
-      enablePasskeys: true,
+      enablePasskeys: false,
       enableMagicLinks: true,
-      enableSocialLogin: false,
       enablePasswordLogin: false,
       branding: {
         companyName: 'Thepia Flows',
         logoUrl: '/favicon.svg',
         primaryColor: thepiaColors.primary,
+        showPoweredBy: true
       },
-    });
+    };
+
+    // Create auth store
+    authStore = createAuthStore(authConfig);
+
+    // Initialize the auth store
+    await authStore.initialize();
+    console.log('✅ Auth store initialized successfully');
 
     // Subscribe to auth state changes
     authStore.subscribe(($auth) => {
@@ -127,60 +140,27 @@ onMount(async () => {
 
     isLoading = false;
   } catch (err) {
-    console.error('Failed to load auth:', err);
-    authError = 'Failed to load authentication system';
+    console.error('Failed to initialize auth store:', err);
+    authError = 'Failed to initialize authentication system. Please check your connection.';
     isLoading = false;
   }
 });
 
-// Handle passkey sign-in
-async function handlePasskeySignIn() {
-  if (!signinEmail.trim()) {
-    authError = 'Please enter your email address';
-    return;
-  }
-
-  isSigningIn = true;
-  authError = null;
-
-  try {
-    // Try to sign in with passkey using flows-auth
-    console.log('🔍 AuthSection: About to call signInWithPasskey for:', signinEmail);
-    const result = await authStore.signInWithPasskey(signinEmail);
-    console.log('🔍 AuthSection: signInWithPasskey result:', result);
-
-    if (result.step === 'success' && result.user) {
-      // Sign-in successful - will auto-redirect via auth state subscription
-      console.log('✅ AuthSection: Passkey sign-in successful:', result.user);
-      console.log('🔍 AuthSection: Auth store isAuthenticated after sign-in:', authStore.isAuthenticated());
-    } else if (result.success && result.user) {
-      // Handle new response format
-      console.log('✅ AuthSection: Passkey sign-in successful (new format):', result.user);
-      console.log('🔍 AuthSection: Auth store isAuthenticated after sign-in:', authStore.isAuthenticated());
-    }
-  } catch (error) {
-    console.error('Passkey sign-in failed:', error);
-
-    // Handle specific error cases
-    if (error.message?.includes('NotAllowedError')) {
-      authError = 'Passkey authentication was cancelled. Please try again.';
-    } else if (error.message?.includes('NotSupportedError')) {
-      authError = 'Passkey authentication is not supported on this device.';
-    } else if (error.message?.includes('InvalidStateError')) {
-      authError = 'No passkey found for this email address.';
-    } else if (error.message?.includes('not found') || error.message?.includes('404')) {
-      authError = 'No account found with this email address.';
-    } else {
-      authError = error.message || 'Sign-in failed. Please try again.';
-    }
-  } finally {
-    isSigningIn = false;
-  }
+// SignInForm event handlers
+function handleSignInSuccess(detail) {
+  console.log('✅ SignInForm Success:', detail);
+  console.log(`🎉 User ${detail.user.email} successfully authenticated via ${detail.method}`);
 }
 
-// Clear error when user starts typing
-function clearError() {
-  authError = null;
+function handleSignInError(detail) {
+  console.error('❌ SignInForm Error:', detail);
+  console.log(`⚠️ Authentication error: ${detail.error.message || detail.error.code}`);
+  authError = detail.error.message || detail.error.code || 'Authentication failed';
+}
+
+function handleStepChange(detail) {
+  console.log('🔄 SignInForm Step Change:', detail);
+  console.log(`📍 Authentication flow step: ${detail.step}`);
 }
 </script>
 
@@ -221,76 +201,26 @@ function clearError() {
         Open Demo App
       </button>
     </div>
+  {:else if SignInFormComponent}
+    <!-- SignInForm Component - gets config from context via useAuthSafe() -->
+    <div class="signin-form-wrapper">
+      <svelte:component this={SignInFormComponent}
+        size="medium"
+        variant="inline"
+        className="thepia-flows-signin"
+        on:success={(e) => handleSignInSuccess(e.detail)}
+        on:error={(e) => handleSignInError(e.detail)}
+        on:stepChange={(e) => handleStepChange(e.detail)}
+      />
+    </div>
   {:else}
-    <!-- Sign In State -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <!-- Header -->
-      <div class="text-center mb-6">
-        <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-          <User size={32} color="var(--color-brand-primary, #988ACA)" />
-        </div>
-        <h3 class="text-xl font-medium text-gray-900 mb-2">Employee Access Required</h3>
-        <p class="text-gray-600">
-          This demo is restricted to Thepia employees. Please sign in with your employee credentials.
-        </p>
+    <!-- Fallback loading for SignInForm -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+        <User size={32} color="var(--color-brand-primary, #988ACA)" />
       </div>
-
-      <!-- Email Input -->
-      <div class="mb-4">
-        <label for="signin-email" class="block text-sm font-medium text-gray-700 mb-2">
-          Email Address
-        </label>
-        <input
-          id="signin-email"
-          type="email"
-          bind:value={signinEmail}
-          on:input={clearError}
-          placeholder="Enter your email"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-          disabled={isSigningIn}
-        />
-      </div>
-
-      <!-- Sign In Button -->
-      <button 
-        on:click={handlePasskeySignIn}
-        class="w-full btn-primary flex items-center justify-center"
-        disabled={!authStore || isSigningIn || !signinEmail.trim()}
-      >
-        {#if isSigningIn}
-          <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-          Signing in...
-        {:else}
-          <div class="mr-2">
-            <Key size={20} color="currentColor" />
-          </div>
-          Sign In with Passkey
-        {/if}
-      </button>
-
-      <!-- Info Section -->
-      <div class="mt-6 pt-6 border-t border-gray-200">
-        <div class="text-sm text-gray-500 space-y-2">
-          <div class="flex items-center">
-            <div class="w-4 h-4 text-green-500 mr-2 flex items-center justify-center">
-              <Lock size={16} color="currentColor" />
-            </div>
-            <span>Secure passkey authentication</span>
-          </div>
-          <div class="flex items-center">
-            <div class="w-4 h-4 text-green-500 mr-2 flex items-center justify-center">
-              <Shield size={16} color="currentColor" />
-            </div>
-            <span>Privacy-compliant access</span>
-          </div>
-          <div class="flex items-center">
-            <div class="w-4 h-4 text-green-500 mr-2 flex items-center justify-center">
-              <Certificate size={16} color="currentColor" />
-            </div>
-            <span>Employee verification required</span>
-          </div>
-        </div>
-      </div>
+      <h3 class="text-xl font-medium text-gray-900 mb-2">Loading Authentication...</h3>
+      <p class="text-gray-600">Please wait while we initialize the sign-in form.</p>
     </div>
   {/if}
 </div>
@@ -298,6 +228,15 @@ function clearError() {
 <style>
   .auth-section {
     max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .signin-form-wrapper {
+    max-width: 100%;
+  }
+
+  /* Ensure SignInForm integrates well with the page */
+  :global(.thepia-flows-signin) {
     margin: 0 auto;
   }
 </style>

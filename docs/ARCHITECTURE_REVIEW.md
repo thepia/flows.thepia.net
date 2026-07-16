@@ -19,7 +19,7 @@ This document outlines the comprehensive review of the flows.thepia.net demo imp
 - **Error Handling**: Basic implementation but not connected to proper error reporting
 
 ### ❌ Missing/Incorrect
-- **Database Integration**: Using localStorage instead of Supabase/flows-db
+- **Database Integration**: Using localStorage instead of Supabase/flows-client
 - **Authentication Architecture**: Mixed auth systems instead of unified Auth0
 - **Multi-tenant Support**: No client isolation or RLS policies
 - **N8N Workflow Integration**: No connection to notification queue system
@@ -125,13 +125,13 @@ const { data: userTasks } = await supabase
 ```
 
 #### **Task 3.2: Implement Proper Schemas**
-- Create `user_tasks` table in flows-db
+- Create `user_tasks` table in flows-client
 - Implement RLS policies for multi-tenant access
 - Add proper foreign key relationships
 
 #### **Task 3.3: Add Error Reporting Integration**
 - Connect to existing Supabase error reporting
-- Remove custom error handling in favor of flows-db patterns
+- Remove custom error handling in favor of flows-client patterns
 
 ### Phase 4: Workflow Integration 📋 *Medium Priority*
 

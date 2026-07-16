@@ -154,7 +154,7 @@ onMount(async () => {
       console.log('🔍 Auth store state changed:', {
         storeState: $auth.state,
         storeUser: !!$auth.user,
-        storeAccessToken: !!$auth.accessToken,
+        storeAccessToken: !!$auth.access_token,
         sessionAuthenticated: isAuthenticated,
         sessionUser: !!currentUser
       });

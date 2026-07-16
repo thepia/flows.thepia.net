@@ -1,5 +1,5 @@
 -- Demo tables for flows.thepia.net
--- These can be added to flows-db when ready
+-- These can be added to flows-client when ready
 
 -- User workflow sessions table
 CREATE TABLE IF NOT EXISTS api.user_workflows (

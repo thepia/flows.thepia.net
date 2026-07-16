@@ -7,7 +7,7 @@ Public demo website for Thepia Flows with live database integration and passkey 
 This repository contains the source code for the public demo website at [flows.thepia.net](https://flows.thepia.net). It serves as:
 
 - **Public landing page** for the official Thepia Flows demo
-- **Live demonstration** of flows-db with real client data
+- **Live demonstration** of flows-client with real client data
 - **Authentication showcase** using flows-auth with passkey login
 - **Admin interface** for invitation management and testing workflows
 - **Component development** environment for eventual migration to flows-admin package
@@ -134,7 +134,7 @@ flows.thepia.net/
 - **Employee-only access** with clear messaging
 
 ### Database Integration
-- **flows-db connection** for live demo data
+- **flows-client connection** for live demo data
 - **Real client examples** from demo database
 - **Performance considerations** for public access
 
@@ -174,7 +174,7 @@ flows.thepia.net/
 
 - **[thepia.com](https://github.com/thepian/thepia.com)** - Main website and API server
 - **[flows-auth](https://github.com/thepia/flows-auth)** - Authentication UI library
-- **[flows-db](https://github.com/thepia/flows-db)** - Database schema and functionality
+- **[flows-client](https://github.com/thepia/flows-client)** - Database schema and functionality
 
 ## License
 

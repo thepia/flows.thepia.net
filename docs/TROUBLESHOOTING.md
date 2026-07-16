@@ -16,7 +16,7 @@
 
 **Solution**:
 ```sql
--- Apply the RLS policy fix in flows-db
+-- Apply the RLS policy fix in flows-client
 \i schemas/23_fix_jwt_role_paths.sql
 
 -- Or manual fix for invitations table:
@@ -41,8 +41,8 @@ CREATE POLICY policy_invitations_staff_access ON api.invitations
 
 **Solution**:
 ```bash
-# Using flows-db CLI tool
-cd ../flows-db
+# Using flows-client CLI tool
+cd ../flows-client
 pnpm admin:assign your-email@thepia.com "Admin access"
 
 # Or manual Supabase Dashboard:
@@ -88,8 +88,8 @@ console.log('Has anon key:', !!import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 
 ## Related Documentation
 
-- **[flows-db Role Architecture](../../flows-db/docs/ROLE_ARCHITECTURE_DECISIONS.md)** - Complete role system documentation
-- **[flows-db User Management](../../flows-db/docs/USER_ROLE_MANAGEMENT.md)** - CLI tools and role assignment
+- **[flows-client Role Architecture](../../flows-client/docs/ROLE_ARCHITECTURE_DECISIONS.md)** - Complete role system documentation
+- **[flows-client User Management](../../flows-client/docs/USER_ROLE_MANAGEMENT.md)** - CLI tools and role assignment
 - **[Admin Interface Implementation](admin-interface.md)** - Architecture and implementation details
 
 ## Getting Help
@@ -97,7 +97,7 @@ console.log('Has anon key:', !!import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 For additional issues:
 1. Check browser console for JavaScript errors
 2. Check network tab for failed API requests  
-3. Verify user role assignment via flows-db CLI tools
+3. Verify user role assignment via flows-client CLI tools
 4. Review RLS policies in Supabase dashboard
 
 

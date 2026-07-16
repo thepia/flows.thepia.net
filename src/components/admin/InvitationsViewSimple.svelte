@@ -334,8 +334,8 @@ async function _handleUpdateStatus(event: CustomEvent<{ id: string; status: stri
 // Generate invitation access URL from JWT token
 function generateInvitationAccessUrl(invitation) {
   const baseUrl = window.location.origin;
-  const accessToken = invitation.jwt_token || invitation.invitation_code;
-  return `${baseUrl}/app?token=${encodeURIComponent(accessToken)}`;
+  const access_token = invitation.jwt_token || invitation.invitation_code;
+  return `${baseUrl}/app?token=${encodeURIComponent(access_token)}`;
 }
 
 // User-friendly error message transformation

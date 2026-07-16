@@ -40,7 +40,7 @@ async function checkAdminAccess(_userId: string): Promise<void> {
       // Check user metadata from session
       const userRole = session.user?.user_metadata?.role as string | undefined;
 
-      // Check for thepia_staff role (following flows-db pattern)
+      // Check for thepia_staff role (following flows-client pattern)
       isAdmin.set(userRole === 'thepia_staff' || userRole === 'service_role');
     } else {
       isAdmin.set(false);

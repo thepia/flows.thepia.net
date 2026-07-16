@@ -5,8 +5,8 @@
 The Admin Interface is a client-only Svelte application that provides Thepia staff with tools to manage demo invitations and system operations for flows.thepia.net. It follows Thepia's client-first, serverless architecture and uses a secure JWT-based role system.
 
 **🔗 Related Documentation:**
-- **[flows-db Role Architecture](../../flows-db/docs/ROLE_ARCHITECTURE_DECISIONS.md)** - Complete architectural decisions and rationale
-- **[flows-db User Role Management](../../flows-db/docs/USER_ROLE_MANAGEMENT.md)** - Technical implementation details
+- **[flows-client Role Architecture](../../flows-client/docs/ROLE_ARCHITECTURE_DECISIONS.md)** - Complete architectural decisions and rationale
+- **[flows-client User Role Management](../../flows-client/docs/USER_ROLE_MANAGEMENT.md)** - Technical implementation details
 
 ## Current Status
 
