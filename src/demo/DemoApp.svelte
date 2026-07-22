@@ -63,6 +63,7 @@ onMount(async () => {
     const apiBaseUrl = await detectApiServer();
     authStore = createAuthStore({
       apiBaseUrl,
+      appCode: 'flows',
       sessionStorage: 'session', // Use sessionStorage for this demo
     });
     console.log('🔒 Auth store initialized for DemoApp');

@@ -16,11 +16,11 @@ import { createAuthStore } from '@thepia/flows-auth';
  */
 describe('createAuthStore Svelte store contract', () => {
   const config = {
+    // ...CONFIG_DEFAULTS
     apiBaseUrl: 'https://api.thepia.com',
     clientId: 'test-client',
     domain: 'thepia.net',
     enablePasskeys: false,
-    enableMagicLinks: true,
     enablePasswordLogin: false,
   };
 

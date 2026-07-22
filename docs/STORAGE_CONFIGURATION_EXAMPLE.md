@@ -38,7 +38,6 @@ onMount(async () => {
       clientId: 'thepia-flows-landing',
       domain: 'thepia.net',
       enablePasskeys: true,
-      enableMagicLinks: true,
       enableSocialLogin: false,
       enablePasswordLogin: false,
       storage: storageConfig, // NEW: Employee-optimized storage
@@ -79,7 +78,6 @@ onMount(async () => {
       clientId: 'thepia-flows-app',
       domain: 'thepia.net',
       enablePasskeys: true,
-      enableMagicLinks: true,
       enableSocialLogin: false,
       enablePasswordLogin: false,
       storage: storageConfig, // NEW: Persistent employee sessions

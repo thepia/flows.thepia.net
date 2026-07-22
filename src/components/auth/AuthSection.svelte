@@ -60,11 +60,11 @@ onMount(async () => {
     // Create auth configuration
     authConfig = {
       apiBaseUrl: apiBaseUrl,
+      appCode: 'flows',
       clientId: 'thepia-flows-landing',
       signInMode: 'login-or-register',
       domain: 'thepia.net',
       enablePasskeys: false,
-      enableMagicLinks: true,
       enablePasswordLogin: false,
       branding: {
         companyName: 'Thepia Flows',

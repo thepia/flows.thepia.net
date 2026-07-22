@@ -95,7 +95,6 @@ const authStore = createAuthStore({
   apiBaseUrl: 'https://api.thepia.com',
   domain: 'thepia.net',
   enablePasskeys: true,
-  enableMagicLinks: true,
   branding: {
     companyName: 'Thepia Flows',
     logoUrl: '/favicon.svg',

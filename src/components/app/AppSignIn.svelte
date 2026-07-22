@@ -94,10 +94,10 @@ onMount(async () => {
 
     authStore = createAuthStore({
       apiBaseUrl: apiBaseUrl,
+      appCode: 'flows',
       clientId: 'thepia-flows-app',
       domain: 'thepia.net',
       enablePasskeys: true,
-      enableMagicLinks: true,
       enableSocialLogin: false,
       enablePasswordLogin: false,
       // Remove hardcoded storage config - use dynamic configuration
@@ -535,7 +535,6 @@ async function handlePasskeySignIn() {
               clientId: 'thepia-flows-app',
               domain: 'thepia.net',
               enablePasskeys: true,
-              enableMagicLinks: true,
               enableSocialLogin: false,
               enablePasswordLogin: false,
               branding: {

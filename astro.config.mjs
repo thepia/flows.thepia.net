@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import svelte from '@astrojs/svelte';
 import tailwindcss from '@tailwindcss/vite';
+import { flowsAuthTreeshake } from '@thepia/flows-auth/vite-preset';
 import { getHttpsConfig, getServerConfig } from './scripts/dev-server.mjs';
 import { resolve } from 'path';
 // import ThepiaBrandingPlugin from '@thepia/branding/astro/ThepiaBrandingPlugin.mjs';
@@ -28,6 +29,11 @@ export default defineConfig({
     plugins: [tailwindcss()],
     define: {
       __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
+    },
+    build: {
+      rollupOptions: {
+        treeshake: flowsAuthTreeshake,
+      },
     },
     resolve: {
       alias: {

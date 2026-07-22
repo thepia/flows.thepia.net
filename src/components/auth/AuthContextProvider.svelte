@@ -63,7 +63,6 @@ onMount(async () => {
       signInMode: 'login-or-register',
       domain: 'thepia.net',
       enablePasskeys: false,
-      enableMagicLinks: true,
       enablePasswordLogin: false,
       branding: {
         companyName: 'Thepia Flows',
