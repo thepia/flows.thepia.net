@@ -19,12 +19,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup pnpm
-        # 11.11.0 matches branding's green CI; 11.5.0 makes ERR_PNPM_IGNORED_BUILDS
-        # fatal for standalone installs (un-approved biome/oxide build scripts),
-        # while 11.11.0 treats it as a warning and proceeds.
         uses: pnpm/action-setup@v6
         with:
-          version: 11.11.0
+          version: 11.5.0 # match packageManager (avoids ERR_PNPM_BAD_PM_VERSION)
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -34,10 +31,19 @@ jobs:
           scope: '@thepia'
           cache: pnpm
 
+      # pnpm 11 requires an explicit build-script allowlist (`allowBuilds`, a
+      # name->bool map; it replaced onlyBuiltDependencies in v11). That lives in
+      # pnpm-workspace.yaml, which only exists at the Thepia workspace ROOT. CI
+      # clones this member ALONE, so generate the equivalent here. NOT committed:
+      # a pnpm-workspace.yaml in this dir would make `pnpm dev` treat the repo as
+      # its own workspace root and lose the live flows-auth link.
+      - name: Approve native build scripts (standalone equivalent of the workspace allowBuilds)
+        run: |
+          printf "allowBuilds:\n  '@biomejs/biome': true\n  '@tailwindcss/oxide': true\n" > pnpm-workspace.yaml
+
       - name: Install
-        # The committed lockfile is a STANDALONE resolution (regenerated with
-        # `pnpm install --ignore-workspace`), since CI clones this repo alone,
-        # outside the Thepia pnpm workspace. Keep it in sync that way.
+        # Committed lockfile is a STANDALONE resolution (pnpm install
+        # --ignore-workspace), since CI clones this repo outside the workspace.
         run: pnpm install --frozen-lockfile
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # org repo: ephemeral token can read @thepia/*
