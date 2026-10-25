@@ -32,12 +32,12 @@ jobs:
           cache: pnpm
 
       - name: Install
-        # Frozen first for authority; fall back to a fresh resolution if the
-        # committed lockfile is stale (this repo is normally built inside the
-        # Thepia pnpm workspace, so its standalone lockfile can drift).
-        run: pnpm install --frozen-lockfile || pnpm install
+        # The committed lockfile is a STANDALONE resolution (regenerated with
+        # `pnpm install --ignore-workspace`), since CI clones this repo alone,
+        # outside the Thepia pnpm workspace. Keep it in sync that way.
+        run: pnpm install --frozen-lockfile
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # org repo: ephemeral token can read @thepia/*
 
       - name: Lint (biome)
         run: pnpm check
