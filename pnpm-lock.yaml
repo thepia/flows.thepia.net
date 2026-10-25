@@ -27,8 +27,8 @@ importers:
         specifier: 1.2.1
         version: 1.2.1(typescript@5.8.3)
       '@thepia/flows-auth':
-        specifier: ^1.3.0
-        version: 1.3.0(@opentelemetry/api@1.10.0)(@phosphor-icons/react@2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@thepia/branding@1.2.1(typescript@5.8.3))(@xyflow/svelte@0.1.30(svelte@5.57.2))(d3@7.9.0)(phosphor-svelte@2.0.1(svelte@5.57.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(svelte@5.57.2)
+        specifier: ^1.3.1
+        version: 1.3.1(@opentelemetry/api@1.10.0)(@phosphor-icons/react@2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@thepia/branding@1.2.1(typescript@5.8.3))(@xyflow/svelte@0.1.30(svelte@5.57.2))(d3@7.9.0)(phosphor-svelte@2.0.1(svelte@5.57.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(svelte@5.57.2)
       astro:
         specifier: ^7.1.0
         version: 7.4.2(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1)
@@ -1357,8 +1357,8 @@ packages:
     peerDependencies:
       typescript: ^5.0.0
 
-  '@thepia/flows-auth@1.3.0':
-    resolution: {integrity: sha512-c5kfz9HmkY9eNHLiGh91/DkA2E3Uq46F71tNmvm9MGlz2+Y9cGso1H6Aq72AnJHXLa9sST1ISVbQBYefg1gRwg==, tarball: https://npm.pkg.github.com/download/@thepia/flows-auth/1.3.0/fdf727c5df328c6237e7736609e280ee4278f8b1}
+  '@thepia/flows-auth@1.3.1':
+    resolution: {integrity: sha512-6CC95jY9wyVJ2OUzWO3P81bwiBK4rGX1frtUn/gY4iMZTkuCi3vZmbhYBY3ZfpIqU6OsnpOG3x+GNhtFK0jQsw==, tarball: https://npm.pkg.github.com/download/@thepia/flows-auth/1.3.1/81d247c4287c1cbb63426738ace5dbf4d0c00145}
     engines: {node: '>=20.0.0', pnpm: '>=11.0.0'}
     peerDependencies:
       '@phosphor-icons/react': ^2.0.0
@@ -1388,14 +1388,14 @@ packages:
   '@types/d3-interpolate@3.0.4':
     resolution: {integrity: sha512-mgLPETlrpVV1YRJIglr4Ez47g7Yxjl1lj7YKsiMCb27VJH9W8NVM6Bb9d8kkpG/uAQS5AmbA48q2IAolKKo1MA==}
 
-  '@types/d3-selection@3.0.11':
-    resolution: {integrity: sha512-bhAXu23DJWsrI45xafYpkQ4NtcKMwWnAC/vKrd2l+nxMFuvOT3XMYTIj2opv8vq8AO5Yh7Qac/nSeP/3zjTK0w==}
+  '@types/d3-selection@3.0.12':
+    resolution: {integrity: sha512-Qe/KWYhEiIIxGs7HrAAjMfShxKldx19SJtr5zu53f3afPsdZNz7HHtdTLXo/kqeiWNXVycI24kSnfzBYkTzpgw==}
 
   '@types/d3-transition@3.0.9':
     resolution: {integrity: sha512-uZS5shfxzO3rGlu0cC3bjmMFKsXv+SmZZcgp0KD22ts4uGXp5EVYGzu/0YdwZeKmddhcAccYtREJKkPfXkZuCg==}
 
-  '@types/d3-zoom@3.0.8':
-    resolution: {integrity: sha512-iqMC4/YlFCSlO8+2Ii1GGGliCAY4XdeG748w5vQUbevlbDu0zSjH/+jojorQVBK/se0j6DUFNPBGSqD3YWYnDw==}
+  '@types/d3-zoom@3.0.9':
+    resolution: {integrity: sha512-0sE1406XBYJGiqD3AusTl9ZqC//2mIXix51tbom25gDCA8ri4xnSZg28CaSE8Srl6FClqABUKfsn0qghgdepMA==}
 
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
@@ -1824,8 +1824,8 @@ packages:
     resolution: {integrity: sha512-zxV/SsA+U4yte8051P4ECydjD/S+qeYtnaIyAs9tgHCqfguma/aAQDjo85A9Z6EKhBirHRJHXIgJUlffT4wdLg==}
     engines: {node: '>=12'}
 
-  d3-format@3.1.0:
-    resolution: {integrity: sha512-YyUI6AEuY/Wpt8KWLgZHsIU86atmikuoOmCfommt0LYHiQSPjvX2AcFc38PX0CBpr2RCyZhjex+NS/LPOv6YqA==}
+  d3-format@3.1.2:
+    resolution: {integrity: sha512-AJDdYOdnyRDV5b6ArilzCPPwc1ejkHcoyFarqlPqT7zRYjhavcT3uSrqcMvsgh2CgoPbK3RCwyHaVyxYcP2Arg==}
     engines: {node: '>=12'}
 
   d3-geo@3.1.1:
@@ -1944,8 +1944,8 @@ packages:
   defu@6.1.7:
     resolution: {integrity: sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ==}
 
-  delaunator@5.0.1:
-    resolution: {integrity: sha512-8nvh+XBe96aCESrGOqMp/84b13H9cdKbG5P2ejQCh4d4sK9RL4371qou9drQjMhvnPmhWl5hnmqbEE0fXr9Xnw==}
+  delaunator@5.1.0:
+    resolution: {integrity: sha512-AGrQ4QSgssa1NGmWmLPqN5NY2KajF5MqxetNEO+o0n3ZwZZeTmt7bBnvzHWrmkZFxGgr4HdyFgelzgi06otLuQ==}
 
   delayed-stream@1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
@@ -2985,8 +2985,8 @@ packages:
     resolution: {integrity: sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
 
-  robust-predicates@3.0.2:
-    resolution: {integrity: sha512-IXgzBWvWQwE6PrDI05OvmXUIruQTcoMDzRsOd5CDvHCVLcLHMTSYvOK5Cm46kWqlV3yAbuSpBZdJ5oP5OUoStg==}
+  robust-predicates@3.0.3:
+    resolution: {integrity: sha512-NS3levdsRIUOmiJ8FZWCP7LG3QpJyrs/TE0Zpf1yvZu8cAJJ6QMW92H1c7kWpdIHo8RvmLxN/o2JXTKHp74lUA==}
 
   rolldown@1.2.15:
     resolution: {integrity: sha512-6odND+fel5zVw3I4Yc2e69gvguDnX0CAAGiNDZSq4ik5WUcaLrkD2GLuog0XcODbor31hZ5ayEMgVDno+KPV5g==}
@@ -5290,7 +5290,7 @@ snapshots:
       kleur: 4.1.5
       typescript: 5.8.3
 
-  '@thepia/flows-auth@1.3.0(@opentelemetry/api@1.10.0)(@phosphor-icons/react@2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@thepia/branding@1.2.1(typescript@5.8.3))(@xyflow/svelte@0.1.30(svelte@5.57.2))(d3@7.9.0)(phosphor-svelte@2.0.1(svelte@5.57.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(svelte@5.57.2)':
+  '@thepia/flows-auth@1.3.1(@opentelemetry/api@1.10.0)(@phosphor-icons/react@2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@thepia/branding@1.2.1(typescript@5.8.3))(@xyflow/svelte@0.1.30(svelte@5.57.2))(d3@7.9.0)(phosphor-svelte@2.0.1(svelte@5.57.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(svelte@5.57.2)':
     dependencies:
       '@dagrejs/dagre': 1.1.5
       '@opentelemetry/api-logs': 0.221.0
@@ -5332,22 +5332,22 @@ snapshots:
 
   '@types/d3-drag@3.0.7':
     dependencies:
-      '@types/d3-selection': 3.0.11
+      '@types/d3-selection': 3.0.12
 
   '@types/d3-interpolate@3.0.4':
     dependencies:
       '@types/d3-color': 3.1.3
 
-  '@types/d3-selection@3.0.11': {}
+  '@types/d3-selection@3.0.12': {}
 
   '@types/d3-transition@3.0.9':
     dependencies:
-      '@types/d3-selection': 3.0.11
+      '@types/d3-selection': 3.0.12
 
-  '@types/d3-zoom@3.0.8':
+  '@types/d3-zoom@3.0.9':
     dependencies:
       '@types/d3-interpolate': 3.0.4
-      '@types/d3-selection': 3.0.11
+      '@types/d3-selection': 3.0.12
 
   '@types/deep-eql@4.0.2': {}
 
@@ -5515,9 +5515,9 @@ snapshots:
   '@xyflow/system@0.0.51':
     dependencies:
       '@types/d3-drag': 3.0.7
-      '@types/d3-selection': 3.0.11
+      '@types/d3-selection': 3.0.12
       '@types/d3-transition': 3.0.9
-      '@types/d3-zoom': 3.0.8
+      '@types/d3-zoom': 3.0.9
       d3-drag: 3.0.0
       d3-selection: 3.0.0
       d3-zoom: 3.0.0
@@ -5881,7 +5881,7 @@ snapshots:
 
   d3-delaunay@6.0.4:
     dependencies:
-      delaunator: 5.0.1
+      delaunator: 5.1.0
 
   d3-dispatch@3.0.1: {}
 
@@ -5908,7 +5908,7 @@ snapshots:
       d3-quadtree: 3.0.1
       d3-timer: 3.0.1
 
-  d3-format@3.1.0: {}
+  d3-format@3.1.2: {}
 
   d3-geo@3.1.1:
     dependencies:
@@ -5936,7 +5936,7 @@ snapshots:
   d3-scale@4.0.2:
     dependencies:
       d3-array: 3.2.4
-      d3-format: 3.1.0
+      d3-format: 3.1.2
       d3-interpolate: 3.0.1
       d3-time: 3.1.0
       d3-time-format: 4.1.0
@@ -5989,7 +5989,7 @@ snapshots:
       d3-ease: 3.0.1
       d3-fetch: 3.0.1
       d3-force: 3.0.0
-      d3-format: 3.1.0
+      d3-format: 3.1.2
       d3-geo: 3.1.1
       d3-hierarchy: 3.1.2
       d3-interpolate: 3.0.1
@@ -6063,9 +6063,9 @@ snapshots:
 
   defu@6.1.7: {}
 
-  delaunator@5.0.1:
+  delaunator@5.1.0:
     dependencies:
-      robust-predicates: 3.0.2
+      robust-predicates: 3.0.3
 
   delayed-stream@1.0.0: {}
 
@@ -6998,7 +6998,7 @@ snapshots:
 
   reusify@1.1.0: {}
 
-  robust-predicates@3.0.2: {}
+  robust-predicates@3.0.3: {}
 
   rolldown@1.2.15:
     dependencies:
