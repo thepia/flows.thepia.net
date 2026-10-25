@@ -52,20 +52,12 @@ jobs:
         run: pnpm check
 
       - name: Typecheck (astro)
-        # PARKED: astro.config imports @thepia/flows-auth/vite-preset, which the PUBLISHED
-        # flows-auth (~1.0.3) does not export yet — only the live workspace version does. Standalone
-        # CI resolves the published version, so this fails until flows-auth publishes vite-preset and
-        # this repo bumps. Same class as app.thepia.net's parked web gate. Drop continue-on-error then.
-        continue-on-error: true
         run: pnpm typecheck
 
       - name: Unit tests
         run: pnpm test:unit
 
       - name: Build
-        # PARKED for the same reason as Typecheck: `pnpm build` runs `astro check && astro build`,
-        # which loads astro.config and hits the unpublished flows-auth/vite-preset export.
-        continue-on-error: true
         run: pnpm build
 
   # Browser e2e (Playwright) is intentionally NOT run here: it needs a running

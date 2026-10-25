@@ -27,8 +27,8 @@ importers:
         specifier: 1.2.1
         version: 1.2.1(typescript@5.8.3)
       '@thepia/flows-auth':
-        specifier: ~1.0.3
-        version: 1.0.14(@xyflow/svelte@0.1.30(svelte@5.57.2))(d3@7.9.0)(phosphor-svelte@2.0.1(svelte@5.57.2))
+        specifier: ^1.3.0
+        version: 1.3.0(@opentelemetry/api@1.10.0)(@phosphor-icons/react@2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@thepia/branding@1.2.1(typescript@5.8.3))(@xyflow/svelte@0.1.30(svelte@5.57.2))(d3@7.9.0)(phosphor-svelte@2.0.1(svelte@5.57.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(svelte@5.57.2)
       astro:
         specifier: ^7.1.0
         version: 7.4.2(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1)
@@ -104,7 +104,7 @@ importers:
         version: 4.7.7(picomatch@4.0.7)(svelte@5.57.2)(typescript@5.8.3)
       vitest:
         specifier: ^4.1.0
-        version: 4.1.12(@types/node@24.0.14)(@vitest/coverage-v8@4.1.12)(@vitest/ui@4.1.12)(jsdom@25.0.1)(vite@8.3.5(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1))
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.0.14)(@vitest/coverage-v8@4.1.12)(@vitest/ui@4.1.12)(jsdom@25.0.1)(vite@8.3.5(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1))
 
 packages:
 
@@ -792,11 +792,90 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
+  '@opentelemetry/api-logs@0.221.0':
+    resolution: {integrity: sha512-OlanaW1vv7ufTqQ3/fPLI4arGt5ZoM+P8abOMki6uEYnpRazepSWDwDnnw+la7kE26SHVC18//SMccrDvLKOXQ==}
+    engines: {node: '>=8.0.0'}
+
+  '@opentelemetry/api@1.10.0':
+    resolution: {integrity: sha512-lMkyes8iHrG+mk6WH7X70MdCLI2RS0FwNBY1PyQ8UemaijE2m5mv5A0Niy3HtbYTFrgkUEQjFMXmSAk2hQDuPQ==}
+    engines: {node: '>=8.0.0'}
+
+  '@opentelemetry/core@2.10.0':
+    resolution: {integrity: sha512-/wNZ8twnEQQA4HoHu22+vcsdru6pWPWxW+7w+FlxT6Id7PE/WIbZmVKkte+PF72e0F2dnImFeHD2syyE1Mw6MQ==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.0.0 <1.10.0'
+
+  '@opentelemetry/core@2.12.0':
+    resolution: {integrity: sha512-1HsSAuvT4/my0QrXWsyXFdWjKaPeCHsismKZgEEIb8NK13LP6DrMRlsUbvD/0F9mDWK3xDom9AMv3IscxgOnOQ==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.0.0 <1.10.0'
+
+  '@opentelemetry/exporter-logs-otlp-http@0.221.0':
+    resolution: {integrity: sha512-nKXkr4Tomi6fjYVOf+ytcW3dZAVr4v4Bv5gsT6dr2gvpUPJpKgHB4XbMufMsPotRE3g0XH2GwVVCkN2w6SON+Q==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': ^1.3.0
+
+  '@opentelemetry/otlp-exporter-base@0.221.0':
+    resolution: {integrity: sha512-UFPIq80OH3Ns/oPFHRj14d4DTOxUo+MUFU8hUiCq5jTqFhdeJnfVSANHT+xp92409cA+oxzvlZCe6NM1wvCuBA==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': ^1.3.0
+
+  '@opentelemetry/otlp-transformer@0.221.0':
+    resolution: {integrity: sha512-lg6lkOU08Az23jVcn/0Els9HP+V8PnR4Km6p0KgpTggS0n/WuhnmY64rSh83Of9iR9nD+dpWr6adlcX8KzAwjg==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': ^1.3.0
+
+  '@opentelemetry/resources@2.10.0':
+    resolution: {integrity: sha512-q6MMm2zhggzsHVNbabYwut+a6nbuQQe3URUoxaojM/8K1IBfwwPzvxIjNi2/lI1TFe+fMHMW9MWhrtDLEXEnkA==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.3.0 <1.10.0'
+
+  '@opentelemetry/resources@2.12.0':
+    resolution: {integrity: sha512-+rSRoOdln6NhXTVcBdHSlZxJDNzwxadeweK2ltZO3tVtfp6aklABc06xclDk6ovRR+EiGgIcSbh/6NgjFhnb3A==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.3.0 <1.10.0'
+
+  '@opentelemetry/sdk-logs@0.221.0':
+    resolution: {integrity: sha512-FaDcazjyMp7TZZZAsqbo4IkovP0UegoCu0EBkiNt+qCqvUf7FPAsfcrZ3+ZEkKgXZ/jHafop+JoGPDk3A0SmLg==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.4.0 <1.10.0'
+
+  '@opentelemetry/sdk-metrics@2.10.0':
+    resolution: {integrity: sha512-t6r1VSvXNtSDnPXU1FbZeetJb7yyovHmgu0wRSoftxtE0g2rSNhQZQUy69sRUCL+iioJpX8SN/S6wq6ZtvLySQ==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.9.0 <1.10.0'
+
+  '@opentelemetry/sdk-trace@2.10.0':
+    resolution: {integrity: sha512-MfQGq3GRmTh5fM/y+OjaO0vj6+luCB1XO2gfXCalKCfgKw0eHL++sm75DNweC6ohlp+aFvACqeE0fYayqdRaoQ==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.3.0 <1.10.0'
+
+  '@opentelemetry/semantic-conventions@1.43.0':
+    resolution: {integrity: sha512-eSYWTm620tTk45EKSedaUL8MFYI8hW164hIXsgIHyxu3VobUB3fFCu5t0hQby6OoWRPsG1KkKUG2M5UadiLiVg==}
+    engines: {node: '>=14'}
+
   '@oslojs/encoding@1.1.0':
     resolution: {integrity: sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ==}
 
   '@oxc-project/types@0.155.0':
     resolution: {integrity: sha512-SeE8JPwW1xs1tHeNycjUtUBdhorRa8o4jlvjwk49R7/Z291i+4DQa7JJIgOm/TaYQZx+QrPQbVJ/9c8dMIZN8Q==}
+
+  '@phosphor-icons/react@2.1.10':
+    resolution: {integrity: sha512-vt8Tvq8GLjheAZZYa+YG/pW7HDbov8El/MANW8pOAz4eGxrwhnbfrQZq0Cp4q8zBEu8NIhHdnr+r8thnfRSNYA==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>= 16.8'
+      react-dom: '>= 16.8'
 
   '@playwright/test@1.54.1':
     resolution: {integrity: sha512-FS8hQ12acieG2dYSksmLOF7BNxnVf2afRJdCuM1eMSxj6QTSE6G4InGF7oApGgDb65MX7AwMVlIkpru0yZA4Xw==}
@@ -1278,13 +1357,18 @@ packages:
     peerDependencies:
       typescript: ^5.0.0
 
-  '@thepia/flows-auth@1.0.14':
-    resolution: {integrity: sha512-e5JNnxl8IwWshiTuNwC8g6fjA4EuqP29intkIUeEzfZlZ6Y3i5aKqQEZQ1Kpw6gBqvyO0jYJnzaaybisLaBP6Q==, tarball: https://npm.pkg.github.com/download/@thepia/flows-auth/1.0.14/fb83b4bb3c65c217edad63f914e2ac35bdf5126c}
+  '@thepia/flows-auth@1.3.0':
+    resolution: {integrity: sha512-c5kfz9HmkY9eNHLiGh91/DkA2E3Uq46F71tNmvm9MGlz2+Y9cGso1H6Aq72AnJHXLa9sST1ISVbQBYefg1gRwg==, tarball: https://npm.pkg.github.com/download/@thepia/flows-auth/1.3.0/fdf727c5df328c6237e7736609e280ee4278f8b1}
     engines: {node: '>=20.0.0', pnpm: '>=11.0.0'}
     peerDependencies:
+      '@phosphor-icons/react': ^2.0.0
+      '@thepia/branding': ^1.5.5
       '@xyflow/svelte': 0.1.30
       d3: ^7.0.0
       phosphor-svelte: ^2.0.0 || ^3.0.0
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+      svelte: ^5.0.0
 
   '@tybys/wasm-util@0.10.4':
     resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
@@ -2840,8 +2924,17 @@ packages:
   radix3@1.1.2:
     resolution: {integrity: sha512-b484I/7b8rDEdSDKckSSBA8knMpcdsXudlE/LNL639wFoHKwLbEkQFZHWEYwDC0wa0FKUcCY+GAF73Z7wxNVFA==}
 
+  react-dom@19.3.1:
+    resolution: {integrity: sha512-Y0bARz53lhEC1NMCASs0/j+faB/zqt3R8hpvg1e8+61ZVJ4UL0UdC4cBbXfZMcIuhrfgeILTLe+ZeBCavQPtKQ==}
+    peerDependencies:
+      react: ^19.3.1
+
   react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
+
+  react@19.3.1:
+    resolution: {integrity: sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw==}
+    engines: {node: '>=0.10.0'}
 
   readdirp@3.6.0:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
@@ -2941,6 +3034,9 @@ packages:
   saxes@6.0.0:
     resolution: {integrity: sha512-xAg7SOnEhrm5zI3puOOKyy1OMcMlIJZYNJY7xLBwSze0UjhPLnWfj2GF2EpT0jmzaJKIWKHLsaSSajf35bcYnA==}
     engines: {node: '>=v12.22.7'}
+
+  scheduler@0.28.0:
+    resolution: {integrity: sha512-juorfCmIkIw8tT+p5BXSm6PJjQF/ycEYmKyzURCIt/RaZIhL+PulbQ9Yu2z1HdOJDdqDTlxA1+xKBmHXJsczAw==}
 
   scule@1.3.0:
     resolution: {integrity: sha512-6FtHJEvt+pVMIB9IBY+IcCJ6Z5f1iQnytgyfKMhDKgmzYG+TeH/wx1y3l27rshSbLiSanrR9ffZDrEsmjlQF2g==}
@@ -4565,9 +4661,88 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
 
+  '@opentelemetry/api-logs@0.221.0':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+
+  '@opentelemetry/api@1.10.0': {}
+
+  '@opentelemetry/core@2.10.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/semantic-conventions': 1.43.0
+
+  '@opentelemetry/core@2.12.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/semantic-conventions': 1.43.0
+
+  '@opentelemetry/exporter-logs-otlp-http@0.221.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/otlp-exporter-base': 0.221.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/otlp-transformer': 0.221.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/sdk-logs': 0.221.0(@opentelemetry/api@1.10.0)
+
+  '@opentelemetry/otlp-exporter-base@0.221.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/otlp-transformer': 0.221.0(@opentelemetry/api@1.10.0)
+
+  '@opentelemetry/otlp-transformer@0.221.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/api-logs': 0.221.0
+      '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/resources': 2.10.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/sdk-logs': 0.221.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/sdk-metrics': 2.10.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/sdk-trace': 2.10.0(@opentelemetry/api@1.10.0)
+
+  '@opentelemetry/resources@2.10.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/semantic-conventions': 1.43.0
+
+  '@opentelemetry/resources@2.12.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/semantic-conventions': 1.43.0
+
+  '@opentelemetry/sdk-logs@0.221.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/api-logs': 0.221.0
+      '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/resources': 2.10.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/semantic-conventions': 1.43.0
+
+  '@opentelemetry/sdk-metrics@2.10.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/resources': 2.10.0(@opentelemetry/api@1.10.0)
+
+  '@opentelemetry/sdk-trace@2.10.0(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/resources': 2.10.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/semantic-conventions': 1.43.0
+
+  '@opentelemetry/semantic-conventions@1.43.0': {}
+
   '@oslojs/encoding@1.1.0': {}
 
   '@oxc-project/types@0.155.0': {}
+
+  '@phosphor-icons/react@2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
 
   '@playwright/test@1.54.1':
     dependencies:
@@ -5115,20 +5290,30 @@ snapshots:
       kleur: 4.1.5
       typescript: 5.8.3
 
-  '@thepia/flows-auth@1.0.14(@xyflow/svelte@0.1.30(svelte@5.57.2))(d3@7.9.0)(phosphor-svelte@2.0.1(svelte@5.57.2))':
+  '@thepia/flows-auth@1.3.0(@opentelemetry/api@1.10.0)(@phosphor-icons/react@2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@thepia/branding@1.2.1(typescript@5.8.3))(@xyflow/svelte@0.1.30(svelte@5.57.2))(d3@7.9.0)(phosphor-svelte@2.0.1(svelte@5.57.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(svelte@5.57.2)':
     dependencies:
       '@dagrejs/dagre': 1.1.5
+      '@opentelemetry/api-logs': 0.221.0
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/exporter-logs-otlp-http': 0.221.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/resources': 2.12.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/sdk-logs': 0.221.0(@opentelemetry/api@1.10.0)
+      '@phosphor-icons/react': 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@simplewebauthn/browser': 13.1.2
+      '@thepia/branding': 1.2.1(typescript@5.8.3)
       '@xyflow/svelte': 0.1.30(svelte@5.57.2)
       base64url: 3.0.1
       d3: 7.9.0
       phosphor-svelte: 2.0.1(svelte@5.57.2)
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+      svelte: 5.57.2
       zod: 4.6.7
-      zustand: 5.0.16
+      zustand: 5.0.16(react@19.3.1)
     transitivePeerDependencies:
+      - '@opentelemetry/api'
       - '@types/react'
       - immer
-      - react
       - use-sync-external-store
 
   '@tybys/wasm-util@0.10.4':
@@ -5216,7 +5401,7 @@ snapshots:
       obug: 2.2.1
       std-env: 4.3.0
       tinyrainbow: 3.2.0
-      vitest: 4.1.12(@types/node@24.0.14)(@vitest/coverage-v8@4.1.12)(@vitest/ui@4.1.12)(jsdom@25.0.1)(vite@8.3.5(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1))
+      vitest: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.0.14)(@vitest/coverage-v8@4.1.12)(@vitest/ui@4.1.12)(jsdom@25.0.1)(vite@8.3.5(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1))
 
   '@vitest/expect@4.1.12':
     dependencies:
@@ -5262,7 +5447,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.17
       tinyrainbow: 3.2.0
-      vitest: 4.1.12(@types/node@24.0.14)(@vitest/coverage-v8@4.1.12)(@vitest/ui@4.1.12)(jsdom@25.0.1)(vite@8.3.5(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1))
+      vitest: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.0.14)(@vitest/coverage-v8@4.1.12)(@vitest/ui@4.1.12)(jsdom@25.0.1)(vite@8.3.5(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1))
 
   '@vitest/utils@4.1.12':
     dependencies:
@@ -6759,7 +6944,14 @@ snapshots:
 
   radix3@1.1.2: {}
 
+  react-dom@19.3.1(react@19.3.1):
+    dependencies:
+      react: 19.3.1
+      scheduler: 0.28.0
+
   react-is@17.0.2: {}
+
+  react@19.3.1: {}
 
   readdirp@3.6.0:
     dependencies:
@@ -6882,6 +7074,8 @@ snapshots:
   saxes@6.0.0:
     dependencies:
       xmlchars: 2.2.0
+
+  scheduler@0.28.0: {}
 
   scule@1.3.0: {}
 
@@ -7296,7 +7490,7 @@ snapshots:
     optionalDependencies:
       vite: 8.3.5(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1)
 
-  vitest@4.1.12(@types/node@24.0.14)(@vitest/coverage-v8@4.1.12)(@vitest/ui@4.1.12)(jsdom@25.0.1)(vite@8.3.5(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1)):
+  vitest@4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.0.14)(@vitest/coverage-v8@4.1.12)(@vitest/ui@4.1.12)(jsdom@25.0.1)(vite@8.3.5(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1)):
     dependencies:
       '@vitest/expect': 4.1.12
       '@vitest/mocker': 4.1.12(vite@8.3.5(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1))
@@ -7319,6 +7513,7 @@ snapshots:
       vite: 8.3.5(@types/node@24.0.14)(jiti@2.4.2)(yaml@2.9.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
+      '@opentelemetry/api': 1.10.0
       '@types/node': 24.0.14
       '@vitest/coverage-v8': 4.1.12(vitest@4.1.12)
       '@vitest/ui': 4.1.12(vitest@4.1.12)
@@ -7554,6 +7749,8 @@ snapshots:
 
   zod@4.6.7: {}
 
-  zustand@5.0.16: {}
+  zustand@5.0.16(react@19.3.1):
+    optionalDependencies:
+      react: 19.3.1
 
   zwitch@2.0.4: {}
