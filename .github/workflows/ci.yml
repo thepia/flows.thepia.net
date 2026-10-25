@@ -19,9 +19,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup pnpm
+        # 11.11.0 matches branding's green CI; 11.5.0 makes ERR_PNPM_IGNORED_BUILDS
+        # fatal for standalone installs (un-approved biome/oxide build scripts),
+        # while 11.11.0 treats it as a warning and proceeds.
         uses: pnpm/action-setup@v6
         with:
-          version: 11.5.0
+          version: 11.11.0
 
       - name: Setup Node
         uses: actions/setup-node@v4
