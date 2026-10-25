@@ -1,6 +1,5 @@
 <script>
 import { thepiaColors } from '@thepia/branding';
-import { Activity, CheckCircle, Warning, XCircle } from 'phosphor-svelte';
 import { onDestroy, onMount } from 'svelte';
 
 let showPopover = $state(false);
