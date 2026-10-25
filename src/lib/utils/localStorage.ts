@@ -9,6 +9,7 @@ export interface DemoSettings {
 
 const SETTINGS_KEY = 'flows-admin-demo-settings';
 
+// biome-ignore lint/complexity/noStaticOnlyClass: intentional namespacing for the demo's settings-persistence helpers; stable LocalStorageManager.* API.
 export class LocalStorageManager {
   /**
    * Save settings to localStorage

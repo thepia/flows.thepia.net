@@ -99,9 +99,16 @@ class AdminErrorReporter {
       'Content-Type': 'application/json',
     };
 
+    const { endpoint } = this.config;
+    if (!endpoint) {
+      // report() and the retry path only call sendEvent after confirming an
+      // endpoint exists; assert that invariant explicitly instead of a non-null `!`.
+      throw new Error('AdminErrorReporter.sendEvent called without a configured endpoint');
+    }
+
     let response: Response;
     try {
-      response = await fetch(this.config.endpoint!, {
+      response = await fetch(endpoint, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload),
