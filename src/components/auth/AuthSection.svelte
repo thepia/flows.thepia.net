@@ -54,7 +54,8 @@ onMount(async () => {
     console.log('🔧 AuthSection using API server:', apiBaseUrl);
 
     // Dynamically import flows-auth
-    const { createAuthStore, SignInForm } = await import('@thepia/flows-auth');
+    const { createAuthStore } = await import('@thepia/flows-auth');
+    const { SignInForm } = await import('@thepia/flows-auth/svelte');
     SignInFormComponent = SignInForm;
 
     // Create auth configuration

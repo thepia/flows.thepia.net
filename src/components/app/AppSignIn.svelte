@@ -3,8 +3,6 @@ import { preventDefault } from 'svelte/legacy';
 
 import { thepiaColors } from '@thepia/branding';
 import {
-  AccountCreationForm,
-  SignInForm,
   configureSessionStorage,
   createAuthStore,
   decodeInvitationToken,
@@ -16,6 +14,7 @@ import {
   processInvitationToken,
   validateInvitationToken,
 } from '@thepia/flows-auth';
+import { AccountCreationForm, SignInForm } from '@thepia/flows-auth/svelte';
 import { onMount } from 'svelte';
 import DemoApp from '../../demo/DemoApp.svelte';
 import LoadingSpinner from '../../demo/LoadingSpinner.svelte';

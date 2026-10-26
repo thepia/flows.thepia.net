@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: read # read @thepia/* from GitHub Packages (org repo: GITHUB_TOKEN suffices)
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.5.0 # match packageManager (avoids ERR_PNPM_BAD_PM_VERSION)
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@thepia'
+          cache: pnpm
+
+      # CI clones this member ALONE, outside the Thepia pnpm workspace, so NONE of the
+      # root pnpm-workspace.yaml policy applies. Recreate the parts that matter here:
+      #   - allowBuilds: pnpm 11 build-script approval (name->bool map; replaced the v10
+      #     onlyBuiltDependencies). Without it biome/oxide fail ERR_PNPM_IGNORED_BUILDS.
+      #   - minimumReleaseAgeExclude @thepia/*: exempt our OWN packages from the release-age
+      #     cooldown so a freshly-published @thepia/flows-auth doesn't fail the lockfile
+      #     supply-chain check (the root workspace exempts @thepia/* for the same reason).
+      # NOT committed: a pnpm-workspace.yaml in this dir would make `pnpm dev` treat the repo
+      # as its own workspace root and lose the live flows-auth link.
+      - name: Generate standalone pnpm-workspace.yaml (mirror root policy for a lone clone)
+        run: |
+          printf "minimumReleaseAgeExclude:\n  - '@thepia/*'\nallowBuilds:\n  '@biomejs/biome': true\n  '@tailwindcss/oxide': true\n" > pnpm-workspace.yaml
+
+      - name: Install
+        # Committed lockfile is a STANDALONE resolution (pnpm install
+        # --ignore-workspace), since CI clones this repo outside the workspace.
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # org repo: ephemeral token can read @thepia/*
+
+      - name: Lint (biome)
+        run: pnpm check
+
+      - name: Typecheck (astro)
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test:unit
+
+      - name: Build
+        run: pnpm build
+
+  # Browser e2e (Playwright) is intentionally NOT run here: it needs a running
+  # SSL server + browsers and belongs in a separate, heavier job. Integration
+  # tests hit real services and are excluded from the PR gate too.

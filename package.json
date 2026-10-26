@@ -1,7 +1,7 @@
 {
   "name": "@thepia/flows.thepia.net",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Public demo website for Thepia Flows with live database integration and passkey authentication",
   "scripts": {
     "dev": "astro dev",
@@ -42,7 +42,7 @@
     "@supabase/supabase-js": "^2.50.5",
     "@tailwindcss/vite": "^4.1.10",
     "@thepia/branding": "1.2.1",
-    "@thepia/flows-auth": "~1.0.3",
+    "@thepia/flows-auth": "^1.3.1",
     "astro": "^7.1.0",
     "bits-ui": "^2.8.11",
     "clsx": "^2.1.1",
